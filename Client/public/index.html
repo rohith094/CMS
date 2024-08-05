@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <title>GMRIT CMS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+      }
+      @media (max-width: 899px) {
+        .hide-mobile {
+          display: none;
+        }
+      }
+      @media (min-width: 599px) {
+        .only-mobile {
+          display: none;
+        }
+      }
+      * {
+        padding: 0%;
+        margin: 0%;
+      }
+      .container {
+        height: 300px;
+        overflow-y: scroll;
+      }
+
+      .container::-webkit-scrollbar {
+        width: 12px;
+      }
+
+      .container::-webkit-scrollbar-track {
+        background: #ff7878;
+        border-radius: 10px;
+      }
+
+      .container::-webkit-scrollbar-thumb {
+        background: linear-gradient(to bottom, #ff7e5f, #feb47b);
+        border-radius: 10px;
+      }
+
+      .container::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(to bottom, #ff6f61, #d1667c);
+      }
+    </style>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              clifford: "#da373d",
+              backcolor : "#"
+            },
+            screens: {
+              mob: { max: "699px" },
+            },
+          },
+        },
+      };
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+  </body>
+</html>

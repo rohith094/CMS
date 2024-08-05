@@ -1,0 +1,115 @@
+[
+  {
+      "jntuno": "21341a05B1",
+      "email": "21341a05B1@gmrit.edu.in",
+      "password": "password123",
+      "fname": "Rohit",
+      "lname": "Sharma",
+      "branch": "ece",
+      "jyear": 2021,
+      "cyear": 2024,
+      "imageurl": "image1.jpg"
+  },
+  {
+      "jntuno": "21341a05B2",
+      "email": "21341a05B2@gmrit.edu.in",
+      "password": "password123",
+      "fname": "Sumanth",
+      "lname": "Reddy",
+      "branch": "mech",
+      "jyear": 2021,
+      "cyear": 2024,
+      "imageurl": "image2.jpg"
+  },
+  {
+      "jntuno": "21341a05B3",
+      "email": "21341a05B3@gmrit.edu.in",
+      "password": "password123",
+      "fname": "Priya",
+      "lname": "Kumar",
+      "branch": "civil",
+      "jyear": 2021,
+      "cyear": 2024,
+      "imageurl": "image3.jpg"
+  },
+  {
+      "jntuno": "21341a05B4",
+      "email": "21341a05B4@gmrit.edu.in",
+      "password": "password123",
+      "fname": "Arjun",
+      "lname": "Varma",
+      "branch": "it",
+      "jyear": 2021,
+      "cyear": 2024,
+      "imageurl": "image4.jpg"
+  },
+  {
+      "jntuno": "21341a05B5",
+      "email": "21341a05B5@gmrit.edu.in",
+      "password": "password123",
+      "fname": "Nisha",
+      "lname": "Patel",
+      "branch": "cse",
+      "jyear": 2021,
+      "cyear": 2024,
+      "imageurl": "image5.jpg"
+  },
+  {
+      "jntuno": "21341a05B6",
+      "email": "21341a05B6@gmrit.edu.in",
+      "password": "password123",
+      "fname": "Vikram",
+      "lname": "Singh",
+      "branch": "eee",
+      "jyear": 2021,
+      "cyear": 2024,
+      "imageurl": "image6.jpg"
+  },
+  {
+      "jntuno": "21341a05B7",
+      "email": "21341a05B7@gmrit.edu.in",
+      "password": "password123",
+      "fname": "Sahana",
+      "lname": "Rao",
+      "branch": "bio",
+      "jyear": 2021,
+      "cyear": 2024,
+      "imageurl": "image7.jpg"
+  },
+  {
+      "jntuno": "21341a05B8",
+      "email": "21341a05B8@gmrit.edu.in",
+      "password": "password123",
+      "fname": "Ankit",
+      "lname": "Mishra",
+      "branch": "cse",
+      "jyear": 2021,
+      "cyear": 2024,
+      "imageurl": "image8.jpg"
+  },
+  {
+      "jntuno": "21341a05B9",
+      "email": "21341a05B9@gmrit.edu.in",
+      "password": "password123",
+      "fname": "Preeti",
+      "lname": "Kaur",
+      "branch": "civil",
+      "jyear": 2021,
+      "cyear": 2024,
+      "imageurl": "image9.jpg"
+  },
+  {
+      "jntuno": "21341a05BA",
+      "email": "21341a05BA@gmrit.edu.in",
+      "password": "password123",
+      "fname": "Rahul",
+      "lname": "Saxena",
+      "branch": "mech",
+      "jyear": 2021,
+      "cyear": 2024,
+      "imageurl": "image10.jpg"
+  }
+]
+
+
+
