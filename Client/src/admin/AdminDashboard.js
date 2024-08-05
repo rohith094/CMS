@@ -2,8 +2,7 @@
 import React, { useState } from "react";
 import * as XLSX from "xlsx";
 import './admindashstyle.css';
-// import Sidebar from "./Sidebar";
-import Sidebar from "../Components/Sidebar";
+import AdminSidebar from "./AdminSidebar";
 
 function AdminDashboard() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -44,14 +43,14 @@ function AdminDashboard() {
     <div className="h-screen flex flex-col">
       <div className="flex w-full h-[100vh]">
         <div className="left w-[20vw]">
-          <Sidebar />
+          <AdminSidebar />
         </div>
         <div className="right w-[80vw] bg-black-500 ml-[5px] mr-[5px] overflow-hidden mt-[20px]">
           <div className="flex justify-between items-center w-full min-w-[900px]">
             <div className="flex items-center justify-center bg-gray-100">
               <button
                 onClick={handleClick}
-                className="px-4 py-2 pt-[0.5rem] font-semibold text-white bg-cyan-950 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none"
+                className="ml-4 px-4 py-2 pt-[0.5rem] font-semibold text-white bg-cyan-950 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none"
               >
                 Upload File
               </button>
@@ -62,7 +61,14 @@ function AdminDashboard() {
                 onChange={handleFileChange}
                 className="hidden"
               />
+              <button
+                onClick={handleClick}
+                className="ml-3 px-4 py-2 pt-[0.5rem] font-semibold text-white bg-cyan-950 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none"
+              >
+                Download
+              </button>
             </div>
+            
             <div className="flex justify-center items-center relative">
               <form className="flex items-center max-w-lg mx-auto mr-[0.5rem]">
                 <label htmlFor="voice-search" className="sr-only">
@@ -97,7 +103,7 @@ function AdminDashboard() {
                     type="button"
                     className="absolute inset-y-0 end-0 flex items-center pe-3"
                   >
-                    {/* <CiSearch /> */}
+                  
                   </button>
                 </div>
                 <button
@@ -119,11 +125,11 @@ function AdminDashboard() {
                       d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
                     />
                   </svg>
-                  {/* Search */}
+                
                 </button>
               </form>
 
-              <button
+              {/* <button
                 onClick={toggleDropdown}
                 className="text-white mr-[0.5rem] bg-cyan-950 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 type="button"
@@ -144,9 +150,9 @@ function AdminDashboard() {
                     d="m1 1 4 4 4-4"
                   />
                 </svg>
-              </button>
+              </button> */}
 
-              <button
+              {/* <button
                 onClick={toggleDropdown}
                 className="text-white mr-[0.5rem] bg-cyan-950 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 type="button"
@@ -167,9 +173,9 @@ function AdminDashboard() {
                     d="m1 1 4 4 4-4"
                   />
                 </svg>
-              </button>
+              </button> */}
 
-              {isDropdownOpen && (
+              {/* {isDropdownOpen && (
                 <div className="absolute mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 z-20">
                   <ul
                     className="py-2 text-sm text-gray-700 dark:text-gray-200"
@@ -209,7 +215,7 @@ function AdminDashboard() {
                     </li>
                   </ul>
                 </div>
-              )}
+              )} */} 
             </div>
           </div>
           <div className="relative h-full pb-[3rem]">
