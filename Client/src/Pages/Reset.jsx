@@ -75,7 +75,7 @@ function Reset() {
 
       if (response.status === 200) {
         toast.success('Password changed successfully');
-        navigate('/login');
+        navigate('/student/login');
       }
     } catch (error) {
       toast.error('Invalid OTP');

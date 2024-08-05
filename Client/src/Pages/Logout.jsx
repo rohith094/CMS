@@ -13,7 +13,7 @@ const Logout = () => {
       toast.info('Logout Successful');
   
       // Redirect to login page
-      navigate('/login');
+      navigate('login');
   }
 
   return (

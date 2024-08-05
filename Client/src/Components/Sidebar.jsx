@@ -108,7 +108,7 @@ const Sidebar = () => {
 
             <li>
               <NavLink
-                to="/dashboard"
+                to="dashboard"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
                 onClick={closeSidebar}
               >
@@ -118,7 +118,7 @@ const Sidebar = () => {
             </li>
             <li>
               <NavLink
-                to="/academics"
+                to="academics"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
                 onClick={closeSidebar}
               >
@@ -129,7 +129,7 @@ const Sidebar = () => {
             </li>
             <li>
               <NavLink
-                to="/examinations"
+                to="examinations"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
                 onClick={closeSidebar}
               >
@@ -140,7 +140,7 @@ const Sidebar = () => {
             </li>
             <li>
               <NavLink
-                to="/attendance"
+                to="attendance"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
                 onClick={closeSidebar}
               >
@@ -150,7 +150,7 @@ const Sidebar = () => {
             </li>
             <li>
               <NavLink
-                to="/placements"
+                to="placements"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
                 onClick={closeSidebar}
               >
@@ -170,7 +170,7 @@ const Sidebar = () => {
             </li> */}
             <li>
               <NavLink
-                to="/feedback"
+                to="feedback"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
                 onClick={closeSidebar}
               >

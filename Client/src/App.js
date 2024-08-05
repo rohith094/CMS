@@ -9,7 +9,8 @@ import AdminLogin from './admin/AdminLogin';
 import AdminDashboard from './admin/AdminDashboard';
 import Adminprotectedroute from './Adminprotectedroute';
 import ResetPassword from './Pages/Reset';
-
+import Studentcomponent from './admin/components/Studentcomponent';
+import NotFoundPage from './NotFoundPage';
 function App() {
 
   return (
@@ -17,16 +18,17 @@ function App() {
       <ToastContainer />
       <Routes>
         <Route path='/resetpassword' element={<ResetPassword />}></Route>
-        <Route path='/admin/login' element={<AdminLogin />} />
-        <Route path="/login" element={<Login />} />
+        <Route path='admin/login' element={<AdminLogin />} />
+        <Route path="student/login" element={<Login />} />
+        <Route path='*' element={<NotFoundPage />} />
+        <Route path="/" element={<Login />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/*" element={<Mainpage />} />
+          <Route path="/student/*" element={<Mainpage />} />
 
         </Route>
 
         <Route element={<Adminprotectedroute />}>
-          <Route path="/admindashboard" element={<AdminDashboard />} />
-          
+          <Route path="/admin/*" element={<AdminDashboard />} />
         </Route>
       </Routes>
     </>

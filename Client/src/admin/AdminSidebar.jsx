@@ -11,6 +11,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import image from './image.png';
 import { CgProfile } from "react-icons/cg";
+import AdminLogout from './AdminLogout';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -112,8 +113,8 @@ const Sidebar = () => {
 
             <li>
               <NavLink
-                to="/dashboard"
-                className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
+                to="/admin/studentsdata" 
+                className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group active"}
                 onClick={closeSidebar}
               >
                 {/* <TbLayoutDashboardFilled className="h-[20px] w-[20px]" /> */}
@@ -123,7 +124,7 @@ const Sidebar = () => {
             </li>
             <li>
               <NavLink
-                to="/academics"
+                to="/admin/facultydata"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
                 onClick={closeSidebar}
               >
@@ -134,7 +135,7 @@ const Sidebar = () => {
             </li>
             <li>
               <NavLink
-                to="/examinations"
+                to="/admin/subjectsdata"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
                 onClick={closeSidebar}
               >
@@ -145,7 +146,7 @@ const Sidebar = () => {
             </li>
             <li>
               <NavLink
-                to="/attendance"
+                to="/admin/attendancedata"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
                 onClick={closeSidebar}
               >
@@ -155,7 +156,7 @@ const Sidebar = () => {
             </li>
             <li>
               <NavLink
-                to="/placements"
+                to="/admin/examinationsdata"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
                 onClick={closeSidebar}
               >
@@ -165,7 +166,7 @@ const Sidebar = () => {
             </li>
             <li>
               <NavLink
-                to="/events"
+                to="/admin/placementsdata"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
                 onClick={closeSidebar}
               >
@@ -175,7 +176,7 @@ const Sidebar = () => {
             </li>
             <li>
               <NavLink
-                to="/feedback"
+                to="/admin/feedbackdata"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
                 onClick={closeSidebar}
               >
@@ -188,7 +189,7 @@ const Sidebar = () => {
               {/* <Logout /> */}
             </li>
           </ul>
-          <Logout />
+          <AdminLogout />
         </div>
       </aside>
     </div>

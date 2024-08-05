@@ -10,6 +10,7 @@ import Placements from './Pages/Placements';
 import Events from './Pages/Events';
 import Attendance from './Pages/Attendance';
 import Feedback from './Pages/Feedback';
+import NotFoundPage from './NotFoundPage';
 
 
 const Mainpage = () => {
@@ -47,6 +48,7 @@ const Mainpage = () => {
           <Route path='placements' element={<Placements />} />
           <Route path='events' element={<Events />} />
           <Route path='feedback' element={<Feedback />} />
+          <Route path='*' element={<Dashboard />} />
         </Routes>
         <Outlet />
       </div>

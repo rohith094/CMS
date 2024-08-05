@@ -23,7 +23,7 @@ const Login = () => {
   useEffect(() => {
     const token = Cookies.get('token');
     if (token) {
-      navigate('/mainpage');
+      navigate('/student/dashboard');
     }
   }, [navigate]);
 
@@ -43,7 +43,7 @@ const Login = () => {
       if (response.data.token) {
         Cookies.set('token', response.data.token, { expires: 1 / 24 });
         toast.success('Login Successful');
-        navigate('/mainpage');
+        navigate('/student/dashboard');
       } else {
         toast.error('Invalid Credentials');
       }

@@ -18,7 +18,7 @@ const AdminLogin = () => {
   useEffect(() => {
     const token = Cookies.get('admintoken');
     if (token) {
-      navigate('/admindashboard');
+      navigate('/admin/admindashboard');
     }
   }, [navigate]);
 
@@ -33,7 +33,7 @@ const AdminLogin = () => {
       if (response.data.token) {
         Cookies.set('admintoken', response.data.token, { expires: 1 / 24 });
         toast.success('Login Successful');
-        navigate('/admindashboard');
+        navigate('/admin/admindashboard');
       } else {
         toast.error('Invalid Credentials');
       }
