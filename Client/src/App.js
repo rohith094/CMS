@@ -9,8 +9,8 @@ import AdminLogin from './admin/AdminLogin';
 import AdminDashboard from './admin/AdminDashboard';
 import Adminprotectedroute from './Adminprotectedroute';
 import ResetPassword from './Pages/Reset';
-import Studentcomponent from './admin/components/Studentcomponent';
 import NotFoundPage from './NotFoundPage';
+import './app.css';
 function App() {
 
   return (

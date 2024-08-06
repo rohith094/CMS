@@ -12,7 +12,8 @@ const upload = multer({ dest: 'uploads/' });
 const Router = express.Router();
 
 Router.post('/addstudent',adminAuth, async (req, res) => {
-  const { jntuno, email, password, fname,lname, branch, jyear, cyear, imageurl  } = req.body;
+  const { jntuno, email, fname,lname, branch, jyear, cyear, imageurl  } = req.body;
+  const password ='studentpassowrd'
   if (!fname || !jntuno || !password || !email || !lname || !branch || !jyear || !cyear || !imageurl) {
     return res.status(400).send('Missing required fields');
   }

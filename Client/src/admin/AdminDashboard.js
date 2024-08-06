@@ -169,9 +169,9 @@ function AdminDashboard() {
           </div>
         </div> */}
 
-        <div className='sm:pl-[20%] md:pl-[20%] lg:pl-[20%] w-[100vw]'>
+        <div className='w-[100vw]'>
         <Routes>
-          <Route index path='studentsdata' element={<Studentcomponent />} />
+          <Route index path='studentsdata/*' element={<Studentcomponent />} /> 
           <Route path='facultydata' element={<Facultydata />} />
           <Route path='subjectsdata' element={<Subjectsdata />} />
           <Route path='attendancedata' element={<Attendancedata />} />
