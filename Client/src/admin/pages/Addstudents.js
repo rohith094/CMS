@@ -118,6 +118,7 @@ const Addstudents = () => {
               </tbody>
             </table>
             <button
+              style={{background:"#1A2438"}}
               onClick={handleSubmit}
               className={`mt-4 w-full py-2 px-4 text-white font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
               disabled={loading}

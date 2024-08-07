@@ -82,7 +82,7 @@ const Sidebar = () => {
         id="default-sidebar"
         className={`fixed top-0 bottom-0 left-0 z-40 w-64 shadow-lg  transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0`}
         aria-label="Sidebar">
-        <div className="h-full px-3 py-4 overflow-y-auto border border-gray-300 bg-cyan-50">
+        <div style={{background:"#1A2438", color : 'white'}} className="h-full px-3 py-4 overflow-y-auto border border-gray-300 ">
           <ul className="space-y-2 font-medium">
             <li className="border border-blue-950 mb-6 shadow-lg h-[28vh] bg-cyan-950 rounded-2xl">
               <a href="#" className="flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-900 group" onClick={closeSidebar}>
@@ -158,16 +158,6 @@ const Sidebar = () => {
                 <span className="flex-1 ms-3 whitespace-nowrap">Placements</span>
               </NavLink>
             </li>
-            {/* <li>
-              <NavLink
-                to="/events"
-                className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group"}
-                onClick={closeSidebar}
-              >
-                <MdEmojiEvents className='w-[20px] h-[20px]' />
-                <span className="flex-1 ms-3 whitespace-nowrap">Events</span>
-              </NavLink>
-            </li> */}
             <li>
               <NavLink
                 to="feedback"
