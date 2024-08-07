@@ -57,6 +57,19 @@ Router.get('/allstudents', adminAuth, async (req, res) => {
   }
 });
 
+Router.get('/allstudents/branchwise', adminAuth, async (req, res) => {
+  const query = 'SELECT branch, COUNT(*) as count FROM students GROUP BY branch';
+  
+  try {
+    const [results] = await connection.execute(query);
+    res.json(results);
+  } catch (error) {
+    console.error('An error occurred while fetching branch-wise student counts:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+
 Router.put('/updatestudent', adminAuth, async (req, res) => {
   const { jntuno, email, fname, lname, branch, jyear, cyear, imageurl } = req.body;
   if (!jntuno || !email || !fname || !lname || !branch || !jyear || !cyear || !imageurl) {
