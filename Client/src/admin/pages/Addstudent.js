@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 import './view.css'
+import { useNavigate } from 'react-router-dom';
 const Addstudent = () => {
   const [student, setStudent] = useState({
     jntuno: '',
@@ -16,6 +17,8 @@ const Addstudent = () => {
   });
   
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,7 +69,7 @@ const Addstudent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validate()) {
-      console.log(student);
+      setLoading(true); // Set loading to true
       // Get the admin token from the cookies
       const admintoken = Cookies.get('admintoken');
       try {
@@ -87,6 +90,7 @@ const Addstudent = () => {
 
         if (response.status === 200) {
           toast.success('Student added successfully');
+
         }
 
       } catch (error) {
@@ -95,6 +99,9 @@ const Addstudent = () => {
         } else {
           toast.error('Error adding student');
         }
+      } finally {
+        setLoading(false);
+        navigate('/admin/studentsdata'); // Set loading to false
       }
     }
   };
@@ -102,7 +109,7 @@ const Addstudent = () => {
   return (
     <div style={{width:"100%", height:"100%",display:"flex",alignItems:"center",justifyContent:"center"}} className=" px-6 ">
       <div style={{width:"100%" ,height:"90%",overflowY:"scroll",display:"flex",flexDirection:"column"}} className="flex flex-colm-6  p-8 border  rounded-lg shadow-lg downscroll ">
-        <h2 className="text-center text-2xl mb-4">Add Student</h2>
+        <h2 style={{fontSize : '2rem', fontWeight : 'bold', color : '#1A2438'}} className="text-center text-2xl mb-4">Add Student</h2>
         <form  onSubmit={handleSubmit}>
           <div className="mb-3">
             <input
@@ -204,9 +211,36 @@ const Addstudent = () => {
           <button
             type="submit"
             style={{background:"#1A2438"}}
-            className="p-2 text-white rounded-md w-full "
+            className={`p-2 text-white rounded-md w-full ${loading ? 'bg-gray-400 cursor-not-allowed' : ''}`}
+            disabled={loading}
           >
-            Add Student
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <svg
+                  className="animate-spin h-5 w-5 mr-3"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Adding Student...
+              </div>
+            ) : (
+              'Add Student'
+            )}
           </button>
         </form>
       </div>

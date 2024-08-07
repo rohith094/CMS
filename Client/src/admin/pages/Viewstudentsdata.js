@@ -52,6 +52,11 @@ function Viewstudentsdata() {
     navigate(`/admin/studentsdata/updatestudent/${jntuno}`);
   };
 
+  const handleDelete = (index) => {
+    const jntuno = studentsarray[index].jntuno;
+    navigate(`/admin/studentsdata/deletestudent/${jntuno}`);
+  };
+
   return (
     <div style={{ width: '97%', height: '94vh', borderRadius: '6px' }} className="overflow-y-scroll scroll-hidden downscroll">
       {loading ? (
@@ -91,7 +96,7 @@ function Viewstudentsdata() {
                   <button className="text-black-500 hover:text-blue-700" onClick={() => handleUpdate(index)}><FaUserEdit /></button>
                 </td>
                 <td className="py-3 px-4">
-                  <button className="text-red-500 hover:text-red-700"><AiTwotoneDelete /></button>
+                  <button className="text-red-500 hover:text-red-700" onClick={() => handleDelete(index)}><AiTwotoneDelete /></button>
                 </td>
               </tr>
             ))}

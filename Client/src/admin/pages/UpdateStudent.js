@@ -123,6 +123,10 @@ const UpdateStudent = () => {
     }
   };
 
+  const handleBack = ()=>{
+    navigate('/admin/studentsdata/viewstudents');
+  }
+
   return (
     <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }} className="px-6">
       <div style={{ width: "100%", height: "90%", overflowY: "scroll", display: "flex", flexDirection: "column" }} className="flex flex-colm-6 p-8 border rounded-lg shadow-lg downscroll">
@@ -232,6 +236,14 @@ const UpdateStudent = () => {
             className="p-2 text-white rounded-md w-full"
           >
             Update Student
+          </button>
+          <button
+          onClick={handleBack}
+            type="submit"
+            style={{ background: "#1A2438" }}
+            className="mt-4 p-2 text-white rounded-md w-full"
+          >
+            Back
           </button>
         </form>
       </div>

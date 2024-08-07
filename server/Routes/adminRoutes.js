@@ -157,6 +157,30 @@ Router.get('/singlestudent/:jntuno', adminAuth, async (req, res) => {
   }
 });
 
+Router.get('/filterstudents', adminAuth, async (req, res) => {
+  const { currentyear, branch } = req.query;
+  let query = 'SELECT jntuno, email, firstname, lastname, imageurl FROM students WHERE 1=1';
+  const params = [];
+
+  if (currentyear) {
+    query += ' AND currentyear = ?';
+    params.push(currentyear);
+  }
+
+  if (branch) {
+    query += ' AND branch = ?';
+    params.push(branch);
+  }
+
+  try {
+    const [results] = await connection.execute(query, params);
+    res.json(results);
+  } catch (error) {
+    console.error('An error occurred while fetching users:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
 
 Router.post("/login", async (req, res) => {
   const { mobile, password } = req.body;
