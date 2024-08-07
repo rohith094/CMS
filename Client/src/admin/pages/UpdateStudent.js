@@ -1,9 +1,13 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
-import './view.css'
-const Addstudent = () => {
+import './view.css';
+
+const UpdateStudent = () => {
+  const { jntuno } = useParams();
+
   const [student, setStudent] = useState({
     jntuno: '',
     email: '',
@@ -14,8 +18,29 @@ const Addstudent = () => {
     currentyear: '',
     imageurl: ''
   });
-  
+
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+
+  const admintoken = Cookies.get('admintoken');
+
+  useEffect(() => {
+    const fetchStudent = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/admin/singlestudent/${jntuno}`,{
+          headers: {
+            'Authorization': `${admintoken}`
+          }
+        });
+        setStudent(response.data);
+      } catch (error) {
+        console.error('Error fetching student data:', error);
+        toast.error('Error fetching student data');
+      }
+    };
+
+    fetchStudent();
+  }, [jntuno]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,11 +91,8 @@ const Addstudent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validate()) {
-      console.log(student);
-      // Get the admin token from the cookies
-      const admintoken = Cookies.get('admintoken');
       try {
-        const response = await axios.post("http://localhost:3001/admin/addstudent", {
+        const response = await axios.put("http://localhost:3001/admin/updatestudent", {
           jntuno: student.jntuno,
           email: student.email,
           fname: student.firstname,
@@ -86,24 +108,26 @@ const Addstudent = () => {
         });
 
         if (response.status === 200) {
-          toast.success('Student added successfully');
+          toast.success('Student updated successfully');
+          // history.push('/students'); // Navigate to students list or another relevant page
+          navigate('/admin/studentsdata/viewstudents');
         }
 
       } catch (error) {
-        if (error.response && error.response.status === 409) {
-          toast.error('A student with the same email or JNTU number already exists');
+        if (error.response && error.response.status === 404) {
+          toast.error('Student not found');
         } else {
-          toast.error('Error adding student');
+          toast.error('Error updating student');
         }
       }
     }
   };
 
   return (
-    <div style={{width:"100%", height:"100%",display:"flex",alignItems:"center",justifyContent:"center"}} className=" px-6 ">
-      <div style={{width:"100%" ,height:"90%",overflowY:"scroll",display:"flex",flexDirection:"column"}} className="flex flex-colm-6  p-8 border  rounded-lg shadow-lg downscroll ">
-        <h2 className="text-center text-2xl mb-4">Add Student</h2>
-        <form  onSubmit={handleSubmit}>
+    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }} className="px-6">
+      <div style={{ width: "100%", height: "90%", overflowY: "scroll", display: "flex", flexDirection: "column" }} className="flex flex-colm-6 p-8 border rounded-lg shadow-lg downscroll">
+        <h2 className="text-center text-2xl mb-4">Update Student</h2>
+        <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <input
               type="text"
@@ -112,6 +136,7 @@ const Addstudent = () => {
               value={student.jntuno}
               onChange={handleChange}
               className="p-2 border border-gray-300 rounded-md w-full"
+              disabled
             />
             {errors.jntuno && <p className="text-red-500 text-sm mt-1">{errors.jntuno}</p>}
           </div>
@@ -203,10 +228,10 @@ const Addstudent = () => {
           </div>
           <button
             type="submit"
-            style={{background:"#1A2438"}}
-            className="p-2 text-white rounded-md w-full "
+            style={{ background: "#1A2438" }}
+            className="p-2 text-white rounded-md w-full"
           >
-            Add Student
+            Update Student
           </button>
         </form>
       </div>
@@ -214,4 +239,4 @@ const Addstudent = () => {
   );
 };
 
-export default Addstudent;
+export default UpdateStudent;

@@ -46,7 +46,7 @@ Router.post('/addstudent',adminAuth, async (req, res) => {
 
 
 Router.get('/allstudents', adminAuth, async (req, res) => {
-  const query = 'SELECT * FROM students';
+  const query = 'SELECT jntuno,email,firstname,lastname,imageurl FROM students';
   
   try {
     const [results] = await connection.execute(query);
@@ -141,6 +141,21 @@ Router.post('/addstudents',adminAuth, upload.single('file'), async (req, res) =>
   }
 });
 
+Router.get('/singlestudent/:jntuno', adminAuth, async (req, res) => {
+  const {jntuno} = req.params;
+  const query = 'SELECT * FROM students WHERE jntuno = ?';
+
+  try {
+    const [results] = await connection.execute(query, [jntuno]);
+    if (results.length === 0) {
+      return res.status(404).send('User not found');
+    }
+    res.json(results[0]);
+  } catch (error) {
+    console.error('An error occurred while fetching user details:', error);
+    res.status(500).send('An error occurred');
+  }
+});
 
 
 Router.post("/login", async (req, res) => {

@@ -7,6 +7,8 @@ import Addstudent from '../pages/Addstudent';
 import Addstudents from "../pages/Addstudents";
 import Viewstudentsdata from "../pages/Viewstudentsdata";
 import '../pages/view.css';
+import Singlestudent from "../pages/Singlestudent";
+import UpdateStudent from "../pages/UpdateStudent";
 
 function Studentcomponent() {
   
@@ -22,6 +24,8 @@ function Studentcomponent() {
           <Route index path='addstudent' element={<Addstudent />} />
           <Route path="addstudents" element={<Addstudents />} />
           <Route path="viewstudents" element={<Viewstudentsdata />} />
+          <Route path="viewstudents/:jntuno" element={<Singlestudent />} />
+          <Route path="updatestudent/:jntuno" element={<UpdateStudent />} />
         </Routes>
         
         <Outlet />
