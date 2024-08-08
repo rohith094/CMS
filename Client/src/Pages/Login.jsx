@@ -1,29 +1,27 @@
-
-import React, { useState, useEffect } from 'react';
-import IT from '../Assets/ITBLOCK.png';
-import gmrit from '../Assets/gmrit.png';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import Cookies from 'js-cookie';
+import React, { useState, useEffect } from "react";
+import IT from "../Assets/ITBLOCK.png";
+import gmrit from "../Assets/gmrit.png";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Cookies from "js-cookie";
 
 import { RiEyeCloseFill } from "react-icons/ri";
 import { FaRegEye } from "react-icons/fa";
 
-
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("token");
     if (token) {
-      navigate('/student/dashboard');
+      navigate("/student/dashboard");
     }
   }, [navigate]);
 
@@ -31,25 +29,32 @@ const Login = () => {
     setIsPasswordVisible(!isPasswordVisible);
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      console.log('Submitting login with email:', email, 'and password:', password);
-      const response = await axios.post('http://localhost:3001/student/login', { email, password });
+      console.log(
+        "Submitting login with email:",
+        email,
+        "and password:",
+        password
+      );
+      const response = await axios.post("http://localhost:3001/student/login", {
+        email,
+        password,
+      });
       console.log(response);
       if (response.data.token) {
-        Cookies.set('token', response.data.token, { expires: 1 / 24 });
-        toast.success('Login Successful');
-        navigate('/student/dashboard');
+        Cookies.set("token", response.data.token, { expires: 1 / 24 });
+        toast.success("Login Successful");
+        navigate("/student/dashboard");
       } else {
-        toast.error('Invalid Credentials');
+        toast.error("Invalid Credentials");
       }
     } catch (error) {
-      console.error('Error during login:', error);
-      toast.error('Login failed');
+      console.error("Error during login:", error);
+      toast.error("Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +91,10 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="mt-1">
               <div className="space-y-5">
                 <div>
-                  <label htmlFor="email" className="text-base font-medium text-gray-900">
+                  <label
+                    htmlFor="email"
+                    className="text-base font-medium text-gray-900"
+                  >
                     Email address
                   </label>
                   <div className="mt-2">
@@ -101,12 +109,15 @@ const Login = () => {
                 </div>
                 <div>
                   <div className="flex items-center justify-between">
-                    <label htmlFor="password" className="text-base font-medium text-gray-900">
+                    <label
+                      htmlFor="password"
+                      className="text-base font-medium text-gray-900"
+                    >
                       Password
                     </label>
                     <Link
-                      style={{textDecoration : 'none'}}
-                      to='/resetpassword'
+                      style={{ textDecoration: "none" }}
+                      to="/resetpassword"
                       title="Forgot password?"
                       className="text-sm font-semibold text-black hover:underline"
                     >
@@ -131,17 +142,21 @@ const Login = () => {
                         value={password}
                         onChange={handlePasswordChange}
                       />
-                      <div onClick={handlePasswordToggle} className="flex items-center px-3 cursor-pointer">
+                      <div
+                        onClick={handlePasswordToggle}
+                        className="flex items-center px-3 cursor-pointer"
+                      >
                         {isPasswordVisible ? <FaRegEye /> : <RiEyeCloseFill />}
                       </div>
                     </div>
                   </div>
-
                 </div>
                 <div>
                   <button
                     type="submit"
-                    className={`inline-flex w-full items-center justify-center rounded-full bg-black px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80 ${isLoading ? 'cursor-not-allowed' : ''}`}
+                    className={`inline-flex w-full items-center justify-center rounded-full bg-black px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80 ${
+                      isLoading ? "cursor-not-allowed" : ""
+                    }`}
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -151,19 +166,32 @@ const Login = () => {
                         fill="none"
                         viewBox="0 0 24 24"
                       >
+                        <defs>
+                          <linearGradient
+                            id="gradient"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="100%"
+                          >
+                            <stop
+                              offset="0%"
+                              style={{ stopColor: "#FFFFFF", stopOpacity: 1 }}
+                            />
+                            <stop
+                              offset="100%"
+                              style={{ stopColor: "#40ADFE", stopOpacity: 1 }}
+                            />
+                          </linearGradient>
+                        </defs>
                         <circle
-                          className="opacity-25"
+                          className="opacity-100"
                           cx="12"
                           cy="12"
                           r="10"
-                          stroke="currentColor"
+                          stroke="url(#gradient)"
                           strokeWidth="4"
                         ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v8H4z"
-                        ></path>
                       </svg>
                     ) : (
                       <>
@@ -187,9 +215,9 @@ const Login = () => {
                     )}
                   </button>
                   <p className="mt-6 text-sm text-gray-600">
-                    Don&#x27;t have an account?{' '}
+                    Don&#x27;t have an account?{" "}
                     <a
-                      href="#"
+                      href="/dashboard"
                       title="Contact Your Administrator"
                       className="font-semibold text-black transition-all duration-200 hover:underline"
                     >

@@ -68,6 +68,10 @@ const Deletestudent = () => {
     );
   }
 
+  const handleBack = ()=>{
+    navigate('/admin/studentsdata/viewstudents');
+  }
+
   return (
     <div className="relative flex bg-clip-border rounded-xl bg-white text-gray-700 w-full max-w-[48rem] flex-row mx-auto my-8">
       <div
@@ -123,6 +127,12 @@ const Deletestudent = () => {
           className="mt-4 bg-gray-800 text-white py-2 px-4 rounded-lg hover:bg-gray-700 w-full"
         >
           Delete Student
+        </button>
+        <button
+          onClick={handleBack}
+          className="mt-4 bg-gray-800 text-white py-2 px-4 rounded-lg hover:bg-gray-700 w-full"
+        >
+          Back
         </button>
       </div>
     </div>

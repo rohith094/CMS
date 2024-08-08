@@ -13,13 +13,13 @@ const Logout = () => {
       toast.info('Logout Successful');
   
       // Redirect to login page
-      navigate('login');
+      navigate('/student/login');
   }
 
   return (
     <button
             type="button"
-            style={{width: '100%', background : '#4D869C' , color : 'white' , borderRadius : '8px', display : 'flex', justifyContent : 'center', alignItems : 'center', padding : '8px'}}
+            style={{width: '100%', background : '#415A77' , color : 'white' , borderRadius : '50px', display : 'flex', justifyContent : 'center', alignItems : 'center', padding : '8px'}}
             onClick={handleLogout}
           >
                 Logout

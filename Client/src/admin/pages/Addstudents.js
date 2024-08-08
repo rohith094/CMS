@@ -4,6 +4,8 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import './view.css';
+
 const Addstudents = () => {
   const [file, setFile] = useState(null);
   const [data, setData] = useState([]);
@@ -52,12 +54,11 @@ const Addstudents = () => {
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
-
       <div className=" bg-white rounded-lg text-center">
         <h2 className="mt-10 text-2xl font-bold">Upload Your File</h2>
         <div className="flex flex-col items-start">
           <label
-            style={{background:"#1A2438"}}
+            style={{ background: "#1A2438" }}
             htmlFor="file_input"
             className="w-full text-sm text-white border border-gray-300 rounded-lg cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 p-2 text-center"
           >
@@ -77,34 +78,36 @@ const Addstudents = () => {
         {preview && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Preview</h2>
-            <table style={{ width: '100%' }} className="bg-white border border-gray-200">
-              <thead>
-                <tr>
-                  {Object.keys(data[0]).map((key) => (
-                    <th
-                      key={key}
-                      className="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-700"
-                    >
-                      {key}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((row, index) => (
-                  <tr key={index}>
-                    {Object.values(row).map((value, i) => (
-                      <td
-                        key={i}
-                        className="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
+            <div style={{width:"70vw"}} className="overflow-x-auto downscroll">
+              <table  className=" bg-white border border-gray-200">
+                <thead>
+                  <tr>
+                    {Object.keys(data[0]).map((key) => (
+                      <th
+                        key={key}
+                        className="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-700"
                       >
-                        {value}
-                      </td>
+                        {key}
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {data.map((row, index) => (
+                    <tr key={index} className="hover:bg-gray-100">
+                      {Object.values(row).map((value, i) => (
+                        <td
+                          key={i}
+                          className="py-2 px-4 border-b border-gray-200 text-sm text-gray-700 whitespace-nowrap"
+                        >
+                          {value}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <button
               style={{ background: "#1A2438" }}
               onClick={handleSubmit}
@@ -147,5 +150,3 @@ const Addstudents = () => {
 };
 
 export default Addstudents;
-
-

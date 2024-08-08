@@ -1,0 +1,138 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.left-side, .right-side {
+  padding: 16px;
+  flex: 1;
+}
+
+.left-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.accordion-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.accordion {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.accordion-input {
+  display: none;
+}
+
+.accordion-label {
+  display: block;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.accordion-content {
+  display: none;
+}
+
+.accordion-input:checked + .accordion-label + .accordion-content {
+  display: block;
+}
+
+.class-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.class-time, .class-subject {
+  color: var(--text-primary);
+}
+
+.task-manager {
+  margin-top: 16px;
+}
+
+.task-input {
+  display: flex;
+  gap: 8px;
+}
+
+.task-input input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 35px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.task-input button {
+  padding: 8px 16px;
+  background-color: var(--bg-button);
+  border: none;
+  border-radius: 35px;
+  color: white;
+  cursor: pointer;
+}
+
+.task-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  border-radius: 35px;
+  font-weight: 500;
+  background-color: gainsboro;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  text-transform: capitalize;
+  padding: 6px 0;
+}
+
+.task-item.completed span {
+  text-decoration: line-through;
+}
+
+.task-item button {
+  background: none;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  color: var(--bg-button);
+}
+
+/* Color Variables */
+:root {
+  --bg-card: #fafafa;
+  --border-color: #ccc;
+  --text-primary: #333;
+  --bg-button: #1d3557;
+}

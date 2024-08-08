@@ -9,22 +9,23 @@
       name="description"
       content="Web site created using create-react-app"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Jersey+15+Charted&family=LXGW+WenKai+TC&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Sedan+SC&family=Share+Tech+Mono&family=Tiny5&display=swap"
+      rel="stylesheet"
+    />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
 
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-    <title>GMRIT CMS</title>
+    <title>GMRIT CA</title>
   </head>
   <body>
     <div id="root"></div>
 
-    <style type="text/tailwindcss">
-      @layer utilities {
-        .content-auto {
-          content-visibility: auto;
-        }
-      }
-      @media (max-width: 899px) {
+    <style>
+      @media (max-width: 599px) {
         .hide-mobile {
           display: none;
         }
@@ -38,49 +39,35 @@
         padding: 0%;
         margin: 0%;
       }
-      .container {
-        height: 300px;
-        overflow-y: scroll;
+      .libre-caslon-text-bold {
+        font-family: "Libre Caslon Text", serif;
+        font-weight: 700;
+        font-style: normal;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
       }
 
-      .container::-webkit-scrollbar {
-        width: 12px;
-      }
-
-      .container::-webkit-scrollbar-track {
-        background: #ff7878;
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: linear-gradient(45deg, #ced9f0, #092857);
         border-radius: 10px;
+        border: 1px solid transparent;
+        background-clip: content-box;
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
       }
 
-      .container::-webkit-scrollbar-thumb {
-        background: linear-gradient(to bottom, #ff7e5f, #feb47b);
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(45deg, #e5e7eb, #092857);
+        box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f9fafb;
         border-radius: 10px;
-      }
-
-      .container::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(to bottom, #ff6f61, #d1667c);
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
       }
     </style>
-
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              clifford: "#da373d",
-              // backcolor : "#"
-              backcolor : "#EBECE9",
-              dark3 : "#6881A1"
-            },
-            screens: {
-              mob: { max: "699px" },
-            },
-          },
-        },
-      };
-    </script>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
   </body>
 </html>
