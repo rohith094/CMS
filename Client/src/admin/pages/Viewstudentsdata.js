@@ -10,7 +10,6 @@ import { AiTwotoneDelete } from "react-icons/ai";
 import { useNavigate } from 'react-router-dom';
 
 function Viewstudentsdata() {
-  // const [isfetch, Setisfetch] = useState(true);
   const [studentsarray, Setstudentsarray] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -26,7 +25,6 @@ function Viewstudentsdata() {
       });
       if (response && response.data) {
         Setstudentsarray(response.data);
-        // Setisfetch(false);
       } else {
         console.error('Unexpected response structure', response);
         toast.error('Unexpected response structure');

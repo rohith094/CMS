@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import dp from '../Assets/dp.png';
+// import dp from '../Assets/dp.png';
 import { PiExamFill } from "react-icons/pi";
-import { TbLayoutDashboardFilled } from "react-icons/tb";
+// import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { HiAcademicCap } from "react-icons/hi2";
 import { MdEmojiEvents, MdFeedback, MdWork } from "react-icons/md";
 import { FaTasks } from "react-icons/fa";
-import Logout from '../Pages/Logout';
+// import Logout from '../Pages/Logout';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import image from './image.png';

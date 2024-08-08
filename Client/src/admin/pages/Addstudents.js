@@ -29,27 +29,6 @@ const Addstudents = () => {
     reader.readAsBinaryString(selectedFile);
   };
 
-  // const handleSubmit = async () => {
-  //   const formData = new FormData();
-  //   formData.append('file', file);
-  //   const admintoken = Cookies.get('admintoken');
-  //   try {
-  //     const response = await axios.post('http://localhost:3001/admin/addstudents', formData, {
-  //       headers: {
-  //         'Content-Type': 'multipart/form-data',
-  //         'Authorization': `${admintoken}`
-  //       },
-  //     });
-  //     toast.success(response.data);
-  //     navigate('/admin/studentsdata');
-  //     // alert(response.data);
-  //   } catch (error) {
-  //     console.error('An error occurred while adding students:', error);
-  //     // alert('An error occurred');
-  //     toast.error('An error occured');
-  //   }
-  // };
-
   const handleSubmit = async () => {
     setLoading(true);
     const formData = new FormData();
@@ -65,7 +44,6 @@ const Addstudents = () => {
       toast.success(response.data);
       navigate('/admin/studentsdata');
     } catch (error) {
-      // console.error('An error occurred while adding students:', error);
       toast.error('An error occurred');
     } finally {
       setLoading(false);
@@ -77,12 +55,22 @@ const Addstudents = () => {
 
       <div className=" bg-white rounded-lg text-center">
         <h2 className="mt-10 text-2xl font-bold">Upload Your File</h2>
-        <input
-          type="file"
-          accept=".xlsx, .xls"
-          onChange={handleFileChange}
-          className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:border-blue-500 p-2"
-        />
+        <div className="flex flex-col items-start">
+          <label
+            style={{background:"#1A2438"}}
+            htmlFor="file_input"
+            className="w-full text-sm text-white border border-gray-300 rounded-lg cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 p-2 text-center"
+          >
+            Choose File
+          </label>
+          <input
+            id="file_input"
+            type="file"
+            accept=".xlsx, .xls"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </div>
       </div>
 
       <div className="mt-3 mb-4 mx-auto bg-white rounded-lg">
@@ -118,7 +106,7 @@ const Addstudents = () => {
               </tbody>
             </table>
             <button
-              style={{background:"#1A2438"}}
+              style={{ background: "#1A2438" }}
               onClick={handleSubmit}
               className={`mt-4 w-full py-2 px-4 text-white font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
               disabled={loading}

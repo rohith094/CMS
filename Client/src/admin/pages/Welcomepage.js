@@ -65,28 +65,28 @@ const Welcomepage = () => {
   }
 
   return (
-    <div style={{ height: '100vh' }} className="container mx-auto p-4">
+    <div style={{ height: '100vh' }} className="mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4 text-center">Branchwise Student Distribution</h1>
 
-      <div style={{ background: "#1A2438", color: 'white' }} className="from-blue-500 to-green-500 p-6 rounded-lg shadow-md mt-4">
+      {/* <div style={{ background: "#1A2438", color: 'white' }} className="from-blue-500 to-green-500 p-6 rounded-lg mt-4">
         <h2 className="text-xl font-bold mb-4 text-white">Student Count by Branch</h2>
         <ul className="space-y-2">
           {branchData.map(branch => (
-            <li key={branch.branch} className="bg-white p-3 rounded-lg shadow-md flex justify-between items-center">
+            <li key={branch.branch} className="bg-white p-3 rounded-lg flex justify-between items-center">
               <span className="font-bold text-gray-700">{branch.branch}</span>
               <span className="text-gray-700">{branch.count} students</span>
             </li>
           ))}
         </ul>
-      </div>
+      </div> */}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+        <div className="bg-white p-6 rounded-lg  flex flex-col items-center">
           <h2 className="text-xl font-bold mb-4">Number of Students</h2>
           <Pie data={getChartData()} />
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+        <div className="bg-white p-6 rounded-lg  flex flex-col items-center">
           <h2 className="text-xl font-bold mb-4">Student Distribution</h2>
           <div style={{ width: '100%', height: '400px' }}>
             <Bar data={getChartData()} options={{ maintainAspectRatio: false }} />

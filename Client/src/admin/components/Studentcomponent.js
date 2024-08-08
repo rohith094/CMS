@@ -5,14 +5,13 @@ import Studentsidebar from "./Studentsidebar";
 import { Routes, Route,Outlet } from 'react-router-dom';
 import Addstudent from '../pages/Addstudent';
 import Addstudents from "../pages/Addstudents";
-import Viewstudentsdata from "../pages/Viewstudentsdata";
 import '../pages/view.css';
 import Singlestudent from "../pages/Singlestudent";
 import UpdateStudent from "../pages/UpdateStudent";
 import Deletestudent from "../pages/Deletestudent";
-// import { Initialpage } from "../pages/Initialpage";
 import Welcomepage from "../pages/Welcomepage";
 import StudentSearch from "../pages/StudentSearch";
+import StudentDownload from "../pages/StudentDownload";
 function Studentcomponent() {
   
 
@@ -31,6 +30,7 @@ function Studentcomponent() {
           <Route path="viewstudents/:jntuno" element={<Singlestudent />} />
           <Route path="updatestudent/:jntuno" element={<UpdateStudent />} />
           <Route path="deletestudent/:jntuno" element={<Deletestudent />} />
+          <Route path="downloadstudents" element={<StudentDownload />} />
         </Routes>
         
         <Outlet />

@@ -4,7 +4,7 @@ import { IoPersonAddSharp } from "react-icons/io5";
 import { MdGroupAdd } from "react-icons/md";
 import { ImProfile } from "react-icons/im";
 import { FaDownload } from "react-icons/fa";
-import { TiArrowBack } from "react-icons/ti";
+import { LuLayoutDashboard } from "react-icons/lu";
 import { NavLink } from 'react-router-dom';
 
 const IconButton = ({ icon: Icon, tooltip }) => (
@@ -20,20 +20,22 @@ const IconButton = ({ icon: Icon, tooltip }) => (
 
 const Studentsidebar = () => (
   <div className="w-60px flex flex-col items-center justify-start pt-4 ml-10">
+  <NavLink to='/admin/studentsdata'>
+    <IconButton icon={LuLayoutDashboard} tooltip="Dashboard" />
+  </NavLink>
   <NavLink to='addstudent'>
     <IconButton icon={IoPersonAddSharp} tooltip="Add Student" />
-    </NavLink>
-    <NavLink to='addstudents'>
+  </NavLink>
+  <NavLink to='addstudents'>
     <IconButton icon={MdGroupAdd} tooltip="Upload Students" />
-    </NavLink>
-    <NavLink to='viewstudents'>
+  </NavLink>
+  <NavLink to='viewstudents'>
     <IconButton icon={ImProfile} tooltip="View Students" />
-    </NavLink>
+  </NavLink>
+  <NavLink to='downloadstudents'>
     <IconButton icon={FaDownload} tooltip="Download Data" />
-    <NavLink to='/admin/studentsdata'>
-    <IconButton icon={TiArrowBack} tooltip="Back" />
-    </NavLink>
-  </div>
+  </NavLink>
+</div>
 );
 
 export default Studentsidebar;

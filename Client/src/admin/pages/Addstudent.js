@@ -106,6 +106,10 @@ const Addstudent = () => {
     }
   };
 
+  const handleBack = ()=>{
+    navigate('/admin/studentsdata');
+  }
+
   return (
     <div style={{width:"100%", height:"100%",display:"flex",alignItems:"center",justifyContent:"center"}} className=" px-6 ">
       <div style={{width:"100%" ,height:"90%",overflowY:"scroll",display:"flex",flexDirection:"column"}} className="flex flex-colm-6  p-8 border  rounded-lg shadow-lg downscroll ">
@@ -242,6 +246,13 @@ const Addstudent = () => {
               'Add Student'
             )}
           </button>
+          <button
+          style={{width : '100%'}}
+          onClick={handleBack}
+          className="mt-4 bg-gray-800 text-white py-2 px-4 rounded-lg hover:bg-gray-700"
+        >
+          Back
+        </button>
         </form>
       </div>
     </div>

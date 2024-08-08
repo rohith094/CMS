@@ -40,7 +40,7 @@ const UpdateStudent = () => {
     };
 
     fetchStudent();
-  }, [jntuno]);
+  }, [jntuno, admintoken]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

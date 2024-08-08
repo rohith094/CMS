@@ -10,7 +10,7 @@ const AdminLogout = () => {
       Cookies.remove('admintoken');
       
       // Show a logout success message
-      toast.success('Logout Successful');
+      toast.info('Logout Successful');
   
       // Redirect to login page
       navigate('/admin/login');
