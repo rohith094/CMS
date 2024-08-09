@@ -448,6 +448,29 @@ Router.get('/filterfaculty/download', adminAuth, async (req, res) => {
   }
 });
 
+// Admin route to update the seen flag
+Router.post('/feedback/mark-seen', adminAuth, async (req, res) => {
+  const { jntuno, seen } = req.body;
+
+  if (!jntuno || seen === undefined) {
+    return res.status(400).send('jntuno and seen flag are required');
+  }
+
+  const query = 'UPDATE feedbacks SET seen = ? WHERE jntuno = ?';
+
+  try {
+    const [updateResults] = await connection.execute(query, [seen, jntuno]);
+
+    if (updateResults.affectedRows === 0) {
+      return res.status(404).send('Feedback not found or already marked as seen');
+    }
+
+    res.json({ success: true, message: `Seen flag updated to ${seen} for student with JNTU number ${jntuno}` });
+  } catch (error) {
+    console.error('An error occurred while updating the seen flag:', error);
+    res.status(500).send('An error occurred');
+  }
+});
 
 export default Router;
 

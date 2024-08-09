@@ -1,15 +1,32 @@
 import React from "react";
 
+import axios from 'axios';
 const FeedbackForm = () => {
   const [feedback, setFeedback] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (feedback.trim()) {
-      setSubmitted(true);
+  // const handleSubmit = aync(req,res) => {
+  //   e.preventDefault();
+  //   // if (feedback.trim()) {
+  //   //   setSubmitted(true);
+  //   // }
+
+  // };
+  const token = 
+  const handleSubmit = async (req, res)=>{
+    try{
+      const response = await axios.post('http://localhost:3000/student/feedback', {
+        fmessage : feedback,
+      },{
+        headers: {
+          'Authorization': `${token}`
+        }
+      })
+
+    }catch(error){
+
     }
-  };
+  }
 
   return (
     <section className="w-[100%] h-[100vh] mt-12 sm:mt-0 md:mt-0 lg:mt-0 bg-plat border border-gray-300 p-2 px-4 rounded-tl-2xl sm:h-[100vh] md:h-[100vh] lg:h-[100vh] md:ml-2 rounded-tr-2xl sm:rounded-bl-2xl md:rounded-bl-2xl lg:rounded-bl-2xl lg:ml-2 sm:ml-2 overflow-x-hidden">

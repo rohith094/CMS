@@ -18,8 +18,8 @@ const generateOTP = () => {
   const digits = '0123456789';
   let otp = '';
   for (let i = 0; i < otpLength; i++) {
-      const randomIndex = Math.floor(Math.random() * digits.length);
-      otp += digits[randomIndex];
+    const randomIndex = Math.floor(Math.random() * digits.length);
+    otp += digits[randomIndex];
   }
 
   return otp;
@@ -31,7 +31,7 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: 'mendarohithkumarr@gmail.com',
     pass: 'czfg myjh ztfq zlvo'
-    
+
   }
 });
 
@@ -53,6 +53,67 @@ Router.get('/singlestudent', authRoute, async (req, res) => {
   }
 });
 
+Router.post('/feedback', authRoute, async (req, res) => {
+  const { message } = req.body;
+  const email = req.user;
+
+  const now = new Date();
+
+  // Extract the date components
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Zero-pad month
+  const day = String(now.getDate()).padStart(2, '0'); // Zero-pad day
+
+  // Extract the time components
+  const hours = String(now.getHours()).padStart(2, '0'); // Zero-pad hours
+  const minutes = String(now.getMinutes()).padStart(2, '0'); // Zero-pad minutes
+  const seconds = String(now.getSeconds()).padStart(2, '0'); // Zero-pad seconds
+
+  // Format the date and time
+  const currentDate = `${year}-${month}-${day}`;
+  const currentTime = `${hours}:${minutes}:${seconds}`;
+
+  if (!message) {
+    return res.status(400).send('Missing required fields');
+  }
+
+  const selectJntunoQuery = 'SELECT jntuno FROM students WHERE email = ?';
+  const checkFeedbackQuery = 'SELECT * FROM feedbacks WHERE jntuno = ?';
+  const insertFeedbackQuery = 'INSERT INTO feedbacks (jntuno, fmessage, ftime, fdate) VALUES (?,?,?,?)';
+  const seenquery = 'SELECT seen FROM feedbacks WHERE jntuno = ? ORDER BY feedback_id DESC LIMIT 1';
+  
+
+  try {
+    const [studentResults] = await connection.execute(selectJntunoQuery, [email]);
+
+    if (studentResults.length === 0) {
+      return res.status(404).send('User not found');
+    }
+
+    const jntuno = studentResults[0].jntuno;
+
+    // Check if feedback already exists for this student
+    const [feedbackResults] = await connection.execute(checkFeedbackQuery, [jntuno]);
+    const [feebbackseenresults] = await connection.execute(seenquery, [jntuno]);
+
+    if (feedbackResults.length > 0 && feebbackseenresults[0].seen === 0 ) {
+      return res.status(409).send('You have already submitted your feedback.');
+    }
+
+    // Insert the new feedback if it doesn't exist
+    const [insertResults] = await connection.execute(insertFeedbackQuery, [jntuno, message, currentTime, currentDate]);
+
+    if (insertResults.affectedRows === 0) {
+      return res.status(500).send('Failed to insert feedback');
+    }
+    res.json({ success: true, message: 'Feedback submitted successfully' });
+
+  } catch (error) {
+    console.error('An error occurred while processing feedback:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
 
 
 Router.get("/sendotp/:email", async (req, res) => {
@@ -60,42 +121,42 @@ Router.get("/sendotp/:email", async (req, res) => {
   console.log(email);
 
   try {
-      // Check if the user exists with the provided email
-      const queryCheckUser = 'SELECT * FROM students WHERE email = ?';
+    // Check if the user exists with the provided email
+    const queryCheckUser = 'SELECT * FROM students WHERE email = ?';
     const [user] = await connection.execute(queryCheckUser, [email]);
 
     if (user.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
-      // Generate a new OTP
-      const otp = generateOTP();
+    // Generate a new OTP
+    const otp = generateOTP();
 
-      // Store the OTP in the database temporarily
-      const queryUpdateOTP = 'UPDATE students SET reset_otp = ? WHERE email = ?';
+    // Store the OTP in the database temporarily
+    const queryUpdateOTP = 'UPDATE students SET reset_otp = ? WHERE email = ?';
     await connection.execute(queryUpdateOTP, [otp, email]);
 
-      // Configure mail options
-      const mailOptions = {
-          from: process.env.EMAIL_USER,
-          to: email,
-          subject: 'Reset Password OTP',
-          text: `OTP for Resetting Your Password:\n${otp}`
-      };
+    // Configure mail options
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Reset Password OTP',
+      text: `OTP for Resetting Your Password:\n${otp}`
+    };
 
-      // Send the email with OTP
-      transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-              console.error('Error sending email:', error);
-              return res.status(500).json({ message: "Failed to send OTP email" });
-          } else {
-              console.log('Email sent:', info.response);
-              return res.json({ message: "OTP sent successfully" });
-          }
-      });
+    // Send the email with OTP
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+        return res.status(500).json({ message: "Failed to send OTP email" });
+      } else {
+        console.log('Email sent:', info.response);
+        return res.json({ message: "OTP sent successfully" });
+      }
+    });
 
   } catch (err) {
-      console.error("Error sending OTP:", err);
-      return res.status(500).json({ message: "Failed to send OTP" });
+    console.error("Error sending OTP:", err);
+    return res.status(500).json({ message: "Failed to send OTP" });
   }
 });
 
