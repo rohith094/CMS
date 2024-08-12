@@ -449,23 +449,37 @@ Router.get('/filterfaculty/download', adminAuth, async (req, res) => {
 });
 
 // Admin route to update the seen flag
-Router.post('/feedback/mark-seen', adminAuth, async (req, res) => {
-  const { jntuno, seen } = req.body;
+Router.get('/feedbacks', adminAuth, async (req, res)=>{
+  const query = 'select * from feedbacks';
 
-  if (!jntuno || seen === undefined) {
+  try{
+    const [results] = await connection.execute(query);
+    if(results.length === 0 ){
+      res.status(404).send("user not found");
+    }
+    res.json(results);
+  }catch(error){
+    res.status(500).send(error);
+  }
+})
+
+Router.post('/feedback/mark-seen', adminAuth, async (req, res) => {
+  const { jntuno } = req.body;
+
+  if (!jntuno) {
     return res.status(400).send('jntuno and seen flag are required');
   }
 
-  const query = 'UPDATE feedbacks SET seen = ? WHERE jntuno = ?';
+  const query = 'UPDATE feedbacks SET seen = 1 WHERE jntuno = ?';
 
   try {
-    const [updateResults] = await connection.execute(query, [seen, jntuno]);
+    const [updateResults] = await connection.execute(query, [jntuno]);
 
     if (updateResults.affectedRows === 0) {
       return res.status(404).send('Feedback not found or already marked as seen');
     }
 
-    res.json({ success: true, message: `Seen flag updated to ${seen} for student with JNTU number ${jntuno}` });
+    res.json({ success: true, message: `Seen flag updated to 1 for student with JNTU number ${jntuno}`});
   } catch (error) {
     console.error('An error occurred while updating the seen flag:', error);
     res.status(500).send('An error occurred');

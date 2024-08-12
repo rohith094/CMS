@@ -56,6 +56,7 @@ Router.get('/singlestudent', authRoute, async (req, res) => {
 Router.post('/feedback', authRoute, async (req, res) => {
   const { message } = req.body;
   const email = req.user;
+  console.log(message);
 
   const now = new Date();
 
@@ -81,7 +82,7 @@ Router.post('/feedback', authRoute, async (req, res) => {
   const checkFeedbackQuery = 'SELECT * FROM feedbacks WHERE jntuno = ?';
   const insertFeedbackQuery = 'INSERT INTO feedbacks (jntuno, fmessage, ftime, fdate) VALUES (?,?,?,?)';
   const seenquery = 'SELECT seen FROM feedbacks WHERE jntuno = ? ORDER BY feedback_id DESC LIMIT 1';
-  
+
 
   try {
     const [studentResults] = await connection.execute(selectJntunoQuery, [email]);
@@ -96,7 +97,7 @@ Router.post('/feedback', authRoute, async (req, res) => {
     const [feedbackResults] = await connection.execute(checkFeedbackQuery, [jntuno]);
     const [feebbackseenresults] = await connection.execute(seenquery, [jntuno]);
 
-    if (feedbackResults.length > 0 && feebbackseenresults[0].seen === 0 ) {
+    if (feedbackResults.length > 0 && feebbackseenresults[0].seen === 0) {
       return res.status(409).send('You have already submitted your feedback.');
     }
 

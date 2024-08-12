@@ -10,7 +10,8 @@ import { Subjectsdata} from "./components/Subjectsdata";
 import { Attendancedata } from "./components/Attendancedata";
 import { Examinationsdata } from "./components/Examinationsdata";
 import { Placementsdata } from "./components/Placementsdata";
-import { Feedbackdata } from "./components/Feedbackdata";
+// import { Feedbackdata } from "./components/Feedbackdata";
+import Feedbacks from "./Feedbacks";
 
 function AdminDashboard() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -177,7 +178,7 @@ function AdminDashboard() {
           <Route path='attendancedata' element={<Attendancedata />} />
           <Route path='examinationsdata' element={<Examinationsdata />} />
           <Route path='placementsdata' element={<Placementsdata />} />
-          <Route path='feedbackdata' element={<Feedbackdata />} />
+          <Route path='feedbackdata' element={<Feedbacks />} />
         </Routes>
         <Outlet />
       </div>
