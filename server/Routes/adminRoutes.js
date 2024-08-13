@@ -11,9 +11,9 @@ const upload = multer({ dest: 'uploads/' });
 
 const Router = express.Router();
 
-Router.post('/addstudent',adminAuth, async (req, res) => {
-  const { jntuno, email, fname,lname, branch, jyear, cyear, imageurl  } = req.body;
-  const password ='studentpassowrd'
+Router.post('/addstudent', adminAuth, async (req, res) => {
+  const { jntuno, email, fname, lname, branch, jyear, cyear, imageurl } = req.body;
+  const password = 'studentpassowrd'
   if (!fname || !jntuno || !password || !email || !lname || !branch || !jyear || !cyear || !imageurl) {
     return res.status(400).send('Missing required fields');
   }
@@ -25,16 +25,16 @@ Router.post('/addstudent',adminAuth, async (req, res) => {
 
     const [existingStudent] = await connection.execute(checkQuery, [email, jntuno]);
 
-    
+
     if (existingStudent.length > 0) {
       return res.status(409).send('A student with the same email or JNTU number already exists');
     }
 
-    const hashedpassword = await  bcrypt.hash(password, 10);
+    const hashedpassword = await bcrypt.hash(password, 10);
     console.log("hashedpassword", hashedpassword);
 
 
-    const [results] = await connection.execute(query, [jntuno, email, hashedpassword, fname,lname, branch, jyear, cyear, imageurl]);
+    const [results] = await connection.execute(query, [jntuno, email, hashedpassword, fname, lname, branch, jyear, cyear, imageurl]);
 
     res.status(201).send('User added successfully');
   } catch (error) {
@@ -46,7 +46,7 @@ Router.post('/addstudent',adminAuth, async (req, res) => {
 
 Router.get('/allstudents', adminAuth, async (req, res) => {
   const query = 'SELECT jntuno,email,firstname,lastname,imageurl FROM students';
-  
+
   try {
     const [results] = await connection.execute(query);
     res.json(results);
@@ -58,7 +58,7 @@ Router.get('/allstudents', adminAuth, async (req, res) => {
 
 Router.get('/allstudents/branchwise', adminAuth, async (req, res) => {
   const query = 'SELECT branch, COUNT(*) as count FROM students GROUP BY branch';
-  
+
   try {
     const [results] = await connection.execute(query);
     res.json(results);
@@ -79,7 +79,7 @@ Router.put('/updatestudent', adminAuth, async (req, res) => {
 
   try {
     const [existingStudent] = await connection.execute(checkQuery, [jntuno]);
-    
+
     if (existingStudent.length === 0) {
       return res.status(404).send('Student not found');
     }
@@ -92,7 +92,7 @@ Router.put('/updatestudent', adminAuth, async (req, res) => {
   }
 });
 
-Router.delete('/deletestudent',adminAuth, async (req, res) => {
+Router.delete('/deletestudent', adminAuth, async (req, res) => {
   const { jntuno } = req.body;
   if (!jntuno) {
     return res.status(400).send('JNTU number is required');
@@ -112,7 +112,7 @@ Router.delete('/deletestudent',adminAuth, async (req, res) => {
   }
 });
 
-Router.post('/addstudents',adminAuth, upload.single('file'), async (req, res) => {
+Router.post('/addstudents', adminAuth, upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded');
   }
@@ -123,7 +123,7 @@ Router.post('/addstudents',adminAuth, upload.single('file'), async (req, res) =>
   try {
     const workbook = xlsx.readFile(req.file.path);
     const sheet_name_list = workbook.SheetNames;
-    const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]); 
+    const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
 
     for (const student of students) {
       const { jntuno, email, password, fname, lname, branch, jyear, cyear, imageurl } = student;
@@ -150,7 +150,7 @@ Router.post('/addstudents',adminAuth, upload.single('file'), async (req, res) =>
 });
 
 Router.get('/singlestudent/:jntuno', adminAuth, async (req, res) => {
-  const {jntuno} = req.params;
+  const { jntuno } = req.params;
   const query = 'SELECT * FROM students WHERE jntuno = ?';
 
   try {
@@ -218,7 +218,7 @@ Router.post("/login", async (req, res) => {
   if (!mobile || !password) {
     return res.status(400).send("Email and password are required");
   }
-  
+
   const query = "SELECT * FROM admins WHERE admin_mobile = ?";
 
   try {
@@ -449,16 +449,16 @@ Router.get('/filterfaculty/download', adminAuth, async (req, res) => {
 });
 
 // Admin route to update the seen flag
-Router.get('/feedbacks', adminAuth, async (req, res)=>{
+Router.get('/feedbacks', adminAuth, async (req, res) => {
   const query = 'select * from feedbacks';
 
-  try{
+  try {
     const [results] = await connection.execute(query);
-    if(results.length === 0 ){
+    if (results.length === 0) {
       res.status(404).send("user not found");
     }
     res.json(results);
-  }catch(error){
+  } catch (error) {
     res.status(500).send(error);
   }
 })
@@ -479,9 +479,169 @@ Router.post('/feedback/mark-seen', adminAuth, async (req, res) => {
       return res.status(404).send('Feedback not found or already marked as seen');
     }
 
-    res.json({ success: true, message: `Seen flag updated to 1 for student with JNTU number ${jntuno}`});
+    res.json({ success: true, message: `Seen flag updated to 1 for student with JNTU number ${jntuno}` });
   } catch (error) {
     console.error('An error occurred while updating the seen flag:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+// Semester routes 
+
+
+Router.post('/addsemester', adminAuth, async (req, res) => {
+  const { SemesterNumber, StartDate, EndDate, SemesterActive } = req.body;
+  const query = 'INSERT INTO Semesters (SemesterNumber, StartDate, EndDate, SemesterActive) VALUES (?, ?, ?, ?)';
+
+  try {
+    const [result] = await connection.execute(query, [SemesterNumber, StartDate, EndDate, SemesterActive]);
+    res.status(201).json({ message: 'Semester added successfully', SemesterID: result.insertId });
+  } catch (error) {
+    console.error('An error occurred while adding the semester:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.put('/editsemester/:SemesterID', adminAuth, async (req, res) => {
+  const { SemesterID } = req.params;
+  const { SemesterNumber, StartDate, EndDate, SemesterActive } = req.body;
+  const query = 'UPDATE Semesters SET SemesterNumber = ?, StartDate = ?, EndDate = ?, SemesterActive = ? WHERE SemesterID = ?';
+  const query2 = 'SELECT * FROM Semesters WHERE SemesterID = ?'
+  try {
+
+    const [existingSemester] = await connection.execute(query2, [SemesterID]);
+    if (existingSemester.length === 0) {
+      return res.status(404).json({ message: 'Semester not found' });
+    }
+
+    await connection.execute(query, [SemesterNumber, StartDate, EndDate, SemesterActive, SemesterID]);
+    res.json({ message: 'Semester updated successfully' });
+  } catch (error) {
+    console.error('An error occurred while updating the semester:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.get('/viewsemesters', adminAuth, async (req, res) => {
+  const query = 'SELECT * FROM Semesters';
+
+  try {
+    const [results] = await connection.execute(query);
+    res.json(results);
+  } catch (error) {
+    console.error('An error occurred while fetching semesters:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.delete('/deletesemester/:SemesterID', adminAuth, async (req, res) => {
+  const { SemesterID } = req.params;
+  const query = 'DELETE FROM Semesters WHERE SemesterID = ?';
+  const query2 = 'SELECT * FROM Semesters WHERE SemesterID = ?'
+
+  try {
+    const [existingSemester] = await connection.execute(query2, [SemesterID]);
+    console.log(existingSemester);
+    if (existingSemester.length === 0) {
+      return res.status(404).json({ message: 'Semester not found' });
+    }
+
+    await connection.execute(query, [SemesterID]);
+    res.json({ message: 'Semester deleted successfully' });
+  } catch (error) {
+    console.error('An error occurred while deleting the semester:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.put('/managesemester/:SemesterID', adminAuth, async (req, res) => {
+  const { SemesterID } = req.params;
+  const { SemesterActive } = req.body;
+  const query = 'UPDATE Semesters SET SemesterActive = ? WHERE SemesterID = ?';
+
+  try {
+    await connection.execute(query, [SemesterActive, SemesterID]);
+    res.json({ message: 'Semester status updated successfully' });
+  } catch (error) {
+    console.error('An error occurred while updating semester status:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+
+// Branch routes 
+
+Router.post('/addbranch', adminAuth, async (req, res) => {
+  const { BranchName, HodName, BlockNumber } = req.body;
+  const query = 'INSERT INTO Branches (BranchName, HodName, BlockNumber) VALUES (?, ?, ?)';
+
+  try {
+    const [result] = await connection.execute(query, [BranchName, HodName, BlockNumber]);
+    res.status(201).json({ BranchID: result.insertId, BranchName, HodName, BlockNumber });
+  } catch (error) {
+    console.error('An error occurred while adding the branch:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.get('/branches', adminAuth, async (req, res) => {
+  const query = 'SELECT * FROM Branches';
+
+  try {
+    const [results] = await connection.execute(query);
+    res.json(results);
+  } catch (error) {
+    console.error('An error occurred while fetching branches:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.get('/branch/:id', adminAuth, async (req, res) => {
+  const query = 'SELECT * FROM Branches WHERE BranchID = ?';
+
+  try {
+    const [results] = await connection.execute(query, [req.params.id]);
+    if (results.length === 0) {
+      return res.status(404).send('Branch not found');
+    }
+    res.json(results[0]);
+  } catch (error) {
+    console.error('An error occurred while fetching the branch:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.put('/branch/:id', adminAuth, async (req, res) => {
+
+  const {branchId} = req.params;
+
+  const { BranchName, HodName, BlockNumber } = req.body;
+  const query = 'UPDATE Branches SET BranchName = ?, HodName = ?, BlockNumber = ? WHERE BranchID = ?';
+
+  try {
+    const [result] = await connection.execute(query, [BranchName, HodName, BlockNumber, req.params.id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Branch not found');
+    }
+    res.json({ BranchID: req.params.id, BranchName, HodName, BlockNumber });
+  } catch (error) {
+    console.error('An error occurred while updating the branch:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.delete('/branch/:id', adminAuth, async (req, res) => {
+
+  const query = 'DELETE FROM Branches WHERE BranchID = ?';
+
+  try {
+    const [result] = await connection.execute(query, [req.params.id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Branch not found');
+    }
+    res.status(200).send("delete successfull");
+  } catch (error) {
+    console.error('An error occurred while deleting the branch:', error);
     res.status(500).send('An error occurred');
   }
 });

@@ -69,9 +69,9 @@ const Feedbacks = () => {
     return (
         <div style={{ height: '100vh', display: 'flex', alignItems: 'center', flexDirection: 'column' }} className="p-6">
             <h2 className="text-xl font-semibold mb-4">Feedbacks</h2>
-            <div style={{ width: '70vw' }} className="overflow-x-auto downscroll">
-                <table className="bg-white border border-gray-200">
-                    <thead>
+            <div style={{ width: '70vw'}} className="overflow-x-auto downscroll">
+                <table className="border border-gray-200">
+                    <thead style={{ backgroundColor: '#1A2438', color: 'white' }}>
                         <tr>
                             <th className="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-700">JNTU Number</th>
                             <th className="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-700">Message</th>

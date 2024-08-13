@@ -1,0 +1,65 @@
+use stepcone;
+
+-- studentInfo TABLE
+CREATE TABLE StudentInfo (
+    Stdid INT PRIMARY KEY AUTO_INCREMENT,
+    AdmissionNumber VARCHAR(20),
+    Jntuno VARCHAR(20),
+    Jntuemail VARCHAR(50),
+    Password VARCHAR(50),
+    Personalmail VARCHAR(50),
+    Mobile VARCHAR(15),
+    Firstname VARCHAR(50),
+    Middlename varchar(255),
+    Lastname VARCHAR(50),
+    Dob DATE,
+    Gender varchar(20),
+    Fathername VARCHAR(50),
+    FatherAdhaar varchar(20),
+    Mothername VARCHAR(50),
+    MotherAdhaar varchar(20),
+    Fathermobile VARCHAR(15),
+    PresentAddress TEXT,
+    PPincode VARCHAR(10),
+    CurrentAddress TEXT,
+    CPincode VARCHAR(10),
+    Stdtype ENUM('EAMCET', 'ECET'),
+    Feereiumbersent ENUM('Yes', 'No'),
+    Caste VARCHAR(30),
+    Category ENUM('A', 'B'),
+    Religion VARCHAR(30),
+    Nationality VARCHAR(30),
+    Adharnumber VARCHAR(20),
+    Bloodgroup VARCHAR(20),
+    StudentStay ENUM('Dayscholar', 'Hostler'),
+    Hallticket VARCHAR(20),
+    TenthPercentage DECIMAL(5,2),
+    InterPercentage DECIMAL(5,2),
+    Rank INT,
+    Joiningyear YEAR,
+    Branchid INT,
+    Semesterid INT,
+    Sectionid INT,
+    Imgurl VARCHAR(255)
+);
+
+
+-- branches
+
+CREATE TABLE Branches (
+    BranchID INT AUTO_INCREMENT PRIMARY KEY,
+    BranchName VARCHAR(100) NOT NULL,
+    HodName VARCHAR(100),
+    BlockNumber int 
+);
+
+-- Semester TABLE
+
+CREATE TABLE Semesters (
+    SemesterID INT AUTO_INCREMENT PRIMARY KEY,
+    SemesterNumber INT NOT NULL,
+    StartDate DATE NOT NULL,
+    EndDate DATE NOT NULL,
+    SemesterActive int 
+);
+
