@@ -523,7 +523,7 @@ Router.put('/editsemester/:SemesterID', adminAuth, async (req, res) => {
 });
 
 Router.get('/viewsemesters', adminAuth, async (req, res) => {
-  const query = 'SELECT * FROM Semesters';
+  const query = 'SELECT * FROM Semesters order by SemesterActive desc';
 
   try {
     const [results] = await connection.execute(query);
@@ -533,6 +533,37 @@ Router.get('/viewsemesters', adminAuth, async (req, res) => {
     res.status(500).send('An error occurred');
   }
 });
+
+Router.get('/allsemesters', adminAuth, async (req, res) => {
+  const query = 'SELECT * FROM Semesters order by SemesterNumber';
+
+  try {
+    const [results] = await connection.execute(query);
+    res.json(results);
+  } catch (error) {
+    console.error('An error occurred while fetching semesters:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.get('/semester/:SemesterID', adminAuth, async (req, res) => {
+  const { SemesterID } = req.params;
+  const query = 'SELECT * FROM Semesters WHERE SemesterID = ?';
+
+  try {
+    const [result] = await connection.execute(query, [SemesterID]);
+    
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'Semester not found' });
+    }
+
+    res.json(result[0]); // Send the first result, which should be the single semester
+  } catch (error) {
+    console.error('An error occurred while retrieving the semester:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
 
 Router.delete('/deletesemester/:SemesterID', adminAuth, async (req, res) => {
   const { SemesterID } = req.params;
@@ -570,6 +601,7 @@ Router.put('/managesemester/:SemesterID', adminAuth, async (req, res) => {
 
 
 // Branch routes 
+
 
 Router.post('/addbranch', adminAuth, async (req, res) => {
   const { BranchName, HodName, BlockNumber } = req.body;
@@ -645,6 +677,140 @@ Router.delete('/branch/:id', adminAuth, async (req, res) => {
     res.status(500).send('An error occurred');
   }
 });
+
+// Sections 
+
+Router.post('/addsection', adminAuth, async (req, res) => {
+  const { SectionName, BranchID, SemesterID } = req.body;
+
+  // Query to check if the section already exists
+  const checkQuery = 'SELECT * FROM Sections WHERE SectionName = ? AND BranchID = ? AND SemesterID = ?';
+  
+  // Query to insert the new section
+  const insertQuery = 'INSERT INTO Sections (SectionName, BranchID, SemesterID) VALUES (?, ?, ?)';
+
+  try {
+    // Check if the section already exists
+    const [existingSections] = await connection.execute(checkQuery, [SectionName, BranchID, SemesterID]);
+
+    if (existingSections.length > 0) {
+      // If section exists, return a conflict status
+      return res.status(409).json({ message: 'Section already exists' });
+    }
+
+    // If section doesn't exist, insert the new section
+    const [result] = await connection.execute(insertQuery, [SectionName, BranchID, SemesterID]);
+    res.status(201).json({ SectionID: result.insertId, SectionName, BranchID, SemesterID });
+    
+  } catch (error) {
+    console.error('An error occurred while adding the section:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+
+Router.get('/allsections', adminAuth, async (req, res) => {
+  const query = 'SELECT * FROM Sections';
+
+  try {
+    const [sections] = await connection.execute(query);
+    res.status(200).json(sections);
+  } catch (error) {
+    console.error('An error occurred while retrieving the sections:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+// Example of updated API endpoint for fetching sections with branch and semester details
+Router.get('/sections', adminAuth, async (req, res) => {
+  const query = `
+    SELECT s.*, b.BranchName, sm.SemesterNumber
+    FROM Sections s
+    LEFT JOIN Branches b ON s.BranchID = b.BranchID
+    LEFT JOIN Semesters sm ON s.SemesterID = sm.SemesterID
+  `;
+
+  try {
+    const [result] = await connection.execute(query);
+    res.json(result);
+  } catch (error) {
+    console.error('An error occurred while retrieving sections:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+
+Router.get('/section/:id', adminAuth, async (req, res) => {
+  const { id } = req.params;
+  const query = 'SELECT * FROM Sections WHERE SectionID = ?';
+
+  try {
+    const [sections] = await connection.execute(query, [id]);
+    if (sections.length > 0) {
+      res.status(200).json(sections[0]);
+    } else {
+      res.status(404).send('Section not found');
+    }
+  } catch (error) {
+    console.error('An error occurred while retrieving the section:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+
+Router.put('/updatesection/:id', adminAuth, async (req, res) => {
+  const { id } = req.params;
+  const { SectionName, BranchID, SemesterID } = req.body;
+
+  // Query to check if the section with the same SectionName, BranchID, and SemesterID exists (excluding the current section)
+  const checkQuery = 'SELECT * FROM Sections WHERE SectionName = ? AND BranchID = ? AND SemesterID = ? AND SectionID != ?';
+
+  // Query to update the section
+  const updateQuery = 'UPDATE Sections SET SectionName = ?, BranchID = ?, SemesterID = ? WHERE SectionID = ?';
+
+  try {
+    // Check if there is a conflicting section
+    const [existingSections] = await connection.execute(checkQuery, [SectionName, BranchID, SemesterID, id]);
+
+    if (existingSections.length > 0) {
+      // If a conflicting section exists, return a conflict status
+      return res.status(409).json({ message: 'A section with the same name, branch, and semester already exists.' });
+    }
+
+    // If no conflict, proceed with the update
+    const [result] = await connection.execute(updateQuery, [SectionName, BranchID, SemesterID, id]);
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ SectionID: id, SectionName, BranchID, SemesterID });
+    } else {
+      res.status(404).send('Section not found');
+    }
+  } catch (error) {
+    console.error('An error occurred while updating the section:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+
+Router.delete('/deletesection/:id', adminAuth, async (req, res) => {
+  const { id } = req.params;
+  const query = 'DELETE FROM Sections WHERE SectionID = ?';
+
+  try {
+    const [result] = await connection.execute(query, [id]);
+    if (result.affectedRows > 0) {
+      res.status(200).send('Section deleted successfully');
+    } else {
+      res.status(404).send('Section not found');
+    }
+  } catch (error) {
+    console.error('An error occurred while deleting the section:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+
+
 
 export default Router;
 

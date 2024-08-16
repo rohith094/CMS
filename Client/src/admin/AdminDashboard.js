@@ -12,6 +12,9 @@ import { Examinationsdata } from "./components/Examinationsdata";
 import { Placementsdata } from "./components/Placementsdata";
 // import { Feedbackdata } from "./components/Feedbackdata";
 import Feedbacks from "./Feedbacks";
+import SemesterComponent from "./components/SemesterComponent";
+import SectionComponent from "./components/SectionComponent";
+import BranchComponent from "./components/BranchComponent";
 
 function AdminDashboard() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -170,7 +173,7 @@ function AdminDashboard() {
           </div>
         </div> */}
 
-        <div className='w-[100vw]'>
+        <div className='w-[80vw]'>
         <Routes>
           <Route index path='studentsdata/*' element={<Studentcomponent />} /> 
           <Route path='facultydata' element={<Facultydata />} />
@@ -179,6 +182,9 @@ function AdminDashboard() {
           <Route path='examinationsdata' element={<Examinationsdata />} />
           <Route path='placementsdata' element={<Placementsdata />} />
           <Route path='feedbackdata' element={<Feedbacks />} />
+          <Route path="semesters/*" element={<SemesterComponent />} />
+          <Route path="branches/*" element={<BranchComponent />} />
+          <Route path="sections/*" element={<SectionComponent />} />
         </Routes>
         <Outlet />
       </div>

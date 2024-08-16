@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-// import dp from '../Assets/dp.png';
 import { PiExamFill } from "react-icons/pi";
-// import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { HiAcademicCap } from "react-icons/hi2";
 import { MdEmojiEvents, MdFeedback, MdWork } from "react-icons/md";
 import { FaTasks } from "react-icons/fa";
-// import Logout from '../Pages/Logout';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import image from './image.png';
 import { CgProfile } from "react-icons/cg";
 import AdminLogout from './AdminLogout';
+
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,7 +47,7 @@ const Sidebar = () => {
         headers: {
           Authorization: `${token}`,
         }
-      }); // assuming you have an endpoint to fetch user data
+      });
       setUserData(response.data);
 
     } catch (error) {
@@ -85,39 +83,47 @@ const Sidebar = () => {
         id="default-sidebar"
         className={`fixed top-0 bottom-0 left-0 z-40 w-64 shadow-lg  transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0`}
         aria-label="Sidebar">
-        <div className="h-full px-3 py-4 overflow-y-auto border border-gray-300 bg-cyan-50">
+        <div style={{background : "#EEF5FF"}} className="h-full px-3 py-4 overflow-y-auto border border-gray-300 custom-scrollbar">
           <ul className="space-y-2 font-medium">
-            <li style={{display :'flex', justifyContent : 'center', alignItems: 'center'}} >
-            <img style={{width : '80%', border : '2px ', filter : 'contrast(200%)'}} src={image} alt="Profile" className="w-20 h-20 object-cover" />
-            {/* <image src={image} /> */}
-              {/* <a href="#" className="flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-900 group" onClick={closeSidebar}>
-                <div className="relative flex items-center">
-                  <img src={image} alt="Profile" className="w-20 h-20 rounded-full object-cover" />
-                  <button className="absolute bottom-0 right-0 bg-cyan-200 text-white rounded-full p-1 hover:bg-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="black">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15.232 5.232l3.536 3.536M9 11l3 3-6 6H3v-3l6-6z" />
-                    </svg>
-                  </button>
-                </div>
-                <span className="ml-3 text-white text-1xl">
-                  <span className='text-lg text-blue-100'>Hello,</span><br></br>
-                  <span style={{textTransform : 'uppercase'}}>{userData.jntuno}</span>
-                </span>
-              </a> */}
-              {/* <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', marginTop: '5px' }}>
-                <span style={{ fontSize: '13px', textTransform: 'capitalize' }} className='text-white'>{userData.firstname}  {userData.lastname}</span>
-                <span style={{ fontSize: '13px' }} className='text-white'>B.Tech  {userData.branch}</span>
-
-              </div> */}
+            <li style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }} >
+              <img style={{ width: '80%', border: '2px ', filter: 'contrast(200%)' }} src={image} alt="Profile" className="w-20 h-20 object-cover" />
             </li>
-
             <li>
               <NavLink
-                to="/admin/studentsdata" 
+                to="/admin/semesters"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group active"}
                 onClick={closeSidebar}
               >
-                {/* <TbLayoutDashboardFilled className="h-[20px] w-[20px]" /> */}
+                <CgProfile className="h-[20px] w-[20px]" />
+                <span className="ms-3">Semesters</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/admin/branches"
+                className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group active"}
+                onClick={closeSidebar}
+              >
+                <CgProfile className="h-[20px] w-[20px]" />
+                <span className="ms-3">Branches</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/admin/sections"
+                className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group active"}
+                onClick={closeSidebar}
+              >
+                <CgProfile className="h-[20px] w-[20px]" />
+                <span className="ms-3">Secitons</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/admin/studentsdata"
+                className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group active"}
+                onClick={closeSidebar}
+              >
                 <CgProfile className="h-[20px] w-[20px]" />
                 <span className="ms-3">Students</span>
               </NavLink>
@@ -183,10 +189,6 @@ const Sidebar = () => {
                 <MdFeedback className='w-[20px] h-[20px]' />
                 <span className="flex-1 ms-3 whitespace-nowrap">Feedbacks</span>
               </NavLink>
-            </li>
-
-            <li>
-              {/* <Logout /> */}
             </li>
           </ul>
           <AdminLogout />
