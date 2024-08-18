@@ -5,28 +5,32 @@ import axios from 'axios';
 
 const AddSemester = () => {
   const [semesterNumber, setSemesterNumber] = useState('');
+  const [semesterName, setSemesterName] = useState(''); // Added field for semester name
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [batchYear, setBatchYear] = useState(''); // Added field for batch year
   const [semesterActive, setSemesterActive] = useState(false);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const goback = ()=>{
-    navigate('/admin/semesters')
-  }
+  const goback = () => {
+    navigate('/admin/semesters');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Set loading to true when form is submitted
+    setLoading(true);
     try {
       const token = Cookies.get('admintoken');
       await axios.post(
         'http://localhost:3001/admin/addsemester',
         {
-          SemesterNumber: semesterNumber,
-          StartDate: startDate,
-          EndDate: endDate,
-          SemesterActive: semesterActive,
+          semesternumber: semesterNumber,
+          semestername: semesterName,
+          startdate: startDate,
+          enddate: endDate,
+          batchyear: batchYear,
+          semesteractive: semesterActive,
         },
         {
           headers: {
@@ -38,12 +42,12 @@ const AddSemester = () => {
     } catch (error) {
       console.error('Error adding semester:', error);
     } finally {
-      setLoading(false); // Set loading to false after request is complete
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen ">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-md bg-white p-8 rounded">
         <h1 className="text-2xl font-bold text-center mb-6">Add Semester</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -53,6 +57,16 @@ const AddSemester = () => {
               type="number"
               value={semesterNumber}
               onChange={(e) => setSemesterNumber(e.target.value)}
+              className="border rounded p-2 w-full"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-2">Semester Name:</label>
+            <input
+              type="text"
+              value={semesterName}
+              onChange={(e) => setSemesterName(e.target.value)}
               className="border rounded p-2 w-full"
               required
             />
@@ -77,6 +91,16 @@ const AddSemester = () => {
               required
             />
           </div>
+          <div>
+            <label className="block mb-2">Batch Year:</label>
+            <input
+              type="number"
+              value={batchYear}
+              onChange={(e) => setBatchYear(e.target.value)}
+              className="border rounded p-2 w-full"
+              required
+            />
+          </div>
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -89,7 +113,7 @@ const AddSemester = () => {
           <button
             type="submit"
             className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
-            disabled={loading} // Disable button while loading
+            disabled={loading}
           >
             {loading ? (
               <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
@@ -99,8 +123,8 @@ const AddSemester = () => {
           </button>
 
           <button 
-          className='w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center'
-          onClick={()=>goback()}
+            className='w-full bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center'
+            onClick={goback}
           >
             Back
           </button>

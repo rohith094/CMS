@@ -120,6 +120,8 @@ Router.post('/addstudents', adminAuth, upload.single('file'), async (req, res) =
   const checkQuery = 'SELECT * FROM students WHERE email = ? OR jntuno = ? ';
   const query = 'INSERT INTO students (jntuno, email, spassword, firstname, lastname, branch, joiningyear, currentyear, imageurl ) VALUES (?,?,?,?,?,?,?,?,?)';
 
+
+
   try {
     const workbook = xlsx.readFile(req.file.path);
     const sheet_name_list = workbook.SheetNames;
@@ -489,32 +491,39 @@ Router.post('/feedback/mark-seen', adminAuth, async (req, res) => {
 // Semester routes 
 
 
+// Add a new semester
 Router.post('/addsemester', adminAuth, async (req, res) => {
-  const { SemesterNumber, StartDate, EndDate, SemesterActive } = req.body;
-  const query = 'INSERT INTO Semesters (SemesterNumber, StartDate, EndDate, SemesterActive) VALUES (?, ?, ?, ?)';
+  const { semesternumber, semestername, startdate, enddate, batchyear, semesteractive } = req.body;
+  const query = `
+    INSERT INTO semesters (semesternumber, semestername, startdate, enddate, batchyear, semesteractive) 
+    VALUES (?, ?, ?, ?, ?, ?)`;
 
   try {
-    const [result] = await connection.execute(query, [SemesterNumber, StartDate, EndDate, SemesterActive]);
-    res.status(201).json({ message: 'Semester added successfully', SemesterID: result.insertId });
+    const [result] = await connection.execute(query, [semesternumber, semestername, startdate, enddate, batchyear, semesteractive]);
+    res.status(201).json({ message: 'Semester added successfully', semesterid: result.insertId });
   } catch (error) {
     console.error('An error occurred while adding the semester:', error);
     res.status(500).send('An error occurred');
   }
 });
 
-Router.put('/editsemester/:SemesterID', adminAuth, async (req, res) => {
-  const { SemesterID } = req.params;
-  const { SemesterNumber, StartDate, EndDate, SemesterActive } = req.body;
-  const query = 'UPDATE Semesters SET SemesterNumber = ?, StartDate = ?, EndDate = ?, SemesterActive = ? WHERE SemesterID = ?';
-  const query2 = 'SELECT * FROM Semesters WHERE SemesterID = ?'
-  try {
+// Edit a semester by ID
+Router.put('/editsemester/:semesterid', adminAuth, async (req, res) => {
+  const { semesterid } = req.params;
+  const { semesternumber, semestername, startdate, enddate, batchyear, semesteractive } = req.body;
+  const query = `
+    UPDATE semesters 
+    SET semesternumber = ?, semestername = ?, startdate = ?, enddate = ?, batchyear = ?, semesteractive = ? 
+    WHERE semesterid = ?`;
+  const query2 = 'SELECT * FROM semesters WHERE semesterid = ?';
 
-    const [existingSemester] = await connection.execute(query2, [SemesterID]);
+  try {
+    const [existingSemester] = await connection.execute(query2, [semesterid]);
     if (existingSemester.length === 0) {
-      return res.status(404).json({ message: 'Semester not found' });
+      return res.status(404).json({ message: 'Semester not found' });
     }
 
-    await connection.execute(query, [SemesterNumber, StartDate, EndDate, SemesterActive, SemesterID]);
+    await connection.execute(query, [semesternumber, semestername, startdate, enddate, batchyear, semesteractive, semesterid]);
     res.json({ message: 'Semester updated successfully' });
   } catch (error) {
     console.error('An error occurred while updating the semester:', error);
@@ -522,8 +531,9 @@ Router.put('/editsemester/:SemesterID', adminAuth, async (req, res) => {
   }
 });
 
+// View all semesters
 Router.get('/viewsemesters', adminAuth, async (req, res) => {
-  const query = 'SELECT * FROM Semesters order by SemesterActive desc';
+  const query = 'SELECT * FROM semesters ORDER BY semesteractive DESC';
 
   try {
     const [results] = await connection.execute(query);
@@ -534,8 +544,9 @@ Router.get('/viewsemesters', adminAuth, async (req, res) => {
   }
 });
 
+// View all semesters ordered by semester number
 Router.get('/allsemesters', adminAuth, async (req, res) => {
-  const query = 'SELECT * FROM Semesters order by SemesterNumber';
+  const query = 'SELECT * FROM semesters ORDER BY semesternumber';
 
   try {
     const [results] = await connection.execute(query);
@@ -546,13 +557,14 @@ Router.get('/allsemesters', adminAuth, async (req, res) => {
   }
 });
 
-Router.get('/semester/:SemesterID', adminAuth, async (req, res) => {
-  const { SemesterID } = req.params;
-  const query = 'SELECT * FROM Semesters WHERE SemesterID = ?';
+// View a specific semester by ID
+Router.get('/semester/:semesterid', adminAuth, async (req, res) => {
+  const { semesterid } = req.params;
+  const query = 'SELECT * FROM semesters WHERE semesterid = ?';
 
   try {
-    const [result] = await connection.execute(query, [SemesterID]);
-    
+    const [result] = await connection.execute(query, [semesterid]);
+
     if (result.length === 0) {
       return res.status(404).json({ message: 'Semester not found' });
     }
@@ -564,20 +576,19 @@ Router.get('/semester/:SemesterID', adminAuth, async (req, res) => {
   }
 });
 
-
-Router.delete('/deletesemester/:SemesterID', adminAuth, async (req, res) => {
-  const { SemesterID } = req.params;
-  const query = 'DELETE FROM Semesters WHERE SemesterID = ?';
-  const query2 = 'SELECT * FROM Semesters WHERE SemesterID = ?'
+// Delete a semester by ID
+Router.delete('/deletesemester/:semesterid', adminAuth, async (req, res) => {
+  const { semesterid } = req.params;
+  const query = 'DELETE FROM semesters WHERE semesterid = ?';
+  const query2 = 'SELECT * FROM semesters WHERE semesterid = ?';
 
   try {
-    const [existingSemester] = await connection.execute(query2, [SemesterID]);
-    console.log(existingSemester);
+    const [existingSemester] = await connection.execute(query2, [semesterid]);
     if (existingSemester.length === 0) {
-      return res.status(404).json({ message: 'Semester not found' });
+      return res.status(404).json({ message: 'Semester not found' });
     }
 
-    await connection.execute(query, [SemesterID]);
+    await connection.execute(query, [semesterid]);
     res.json({ message: 'Semester deleted successfully' });
   } catch (error) {
     console.error('An error occurred while deleting the semester:', error);
@@ -585,19 +596,22 @@ Router.delete('/deletesemester/:SemesterID', adminAuth, async (req, res) => {
   }
 });
 
-Router.put('/managesemester/:SemesterID', adminAuth, async (req, res) => {
-  const { SemesterID } = req.params;
-  const { SemesterActive } = req.body;
-  const query = 'UPDATE Semesters SET SemesterActive = ? WHERE SemesterID = ?';
+// Manage semester status (activate/deactivate) by ID
+Router.put('/managesemester/:semesterid', adminAuth, async (req, res) => {
+  const { semesterid } = req.params;
+  const { semesteractive } = req.body;
+  const query = 'UPDATE semesters SET semesteractive = ? WHERE semesterid = ?';
 
   try {
-    await connection.execute(query, [SemesterActive, SemesterID]);
+    await connection.execute(query, [semesteractive, semesterid]);
     res.json({ message: 'Semester status updated successfully' });
   } catch (error) {
     console.error('An error occurred while updating semester status:', error);
     res.status(500).send('An error occurred');
   }
 });
+
+
 
 
 // Branch routes 
@@ -811,6 +825,139 @@ Router.delete('/deletesection/:id', adminAuth, async (req, res) => {
 
 
 
+// admission routes 
+
+const generateApplicationNumber = async () => {
+  const currentYear = new Date().getFullYear();
+  const prefix = `UG-${currentYear}`;
+
+  try {
+    // Query to count existing applications for the current year
+    const [results] = await connection.query(
+      `SELECT COUNT(*) AS count FROM studentinfo WHERE applicationnumber LIKE ?`,
+      [`${prefix}%`]
+    );
+
+    const count = results[0].count + 1;
+    const applicationNumber = `${prefix}${count.toString().padStart(4, '0')}`;
+    return applicationNumber;
+  } catch (err) {
+    console.error('Error generating application number:', err);
+    throw err; // Re-throw the error to be handled by the calling function
+  }
+};
+
+// Route to admit a student
+Router.post('/admitstudent', adminAuth, async (req, res) => {
+  try {
+    const applicationNumber = await generateApplicationNumber();
+
+    const {
+      admissionnumber,
+      registrationid,
+      joiningdate,
+      firstname,
+      middlename,
+      lastname,
+      studentaadhar,
+      mobile,
+      alternatemobile,
+      personalemail,
+      gender,
+      dob,
+      branch,
+      joiningyear,
+      quota,
+      admissiontype,
+      fathername,
+      mothername,
+      fatheraadhar,
+      motheraadhar,
+      scholarshipholder,
+      presentaddress,
+      presentpincode,
+      currentaddress,
+      currentpincode,
+      moa,
+      remarks,
+      entrancetype,
+      entrancehallticket,
+      rank,
+      city,
+      state,
+      nationality,
+      religion,
+      caste,
+      castecategory
+    } = req.body;
+
+    const query = `
+      INSERT INTO studentinfo (
+        applicationnumber, admissionnumber, registrationid, joiningdate, firstname, middlename, lastname,
+        studentaadhar, mobile, alternatemobile, personalemail, gender, dob, branch, joiningyear, quota,
+        admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, presentaddress,
+        presentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,
+        city, state, nationality, religion, caste, castecategory
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`;
+
+    const values = [
+      applicationNumber, admissionnumber, registrationid, joiningdate, firstname, middlename, lastname,
+      studentaadhar, mobile, alternatemobile, personalemail, gender, dob, branch, joiningyear, quota,
+      admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, presentaddress,
+      presentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,
+      city, state, nationality, religion, caste, castecategory
+    ];
+
+    await connection.query(query, values);
+    res.status(200).json({ message: 'Student added successfully', applicationnumber: applicationNumber });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add student', details: err.message });
+  }
+});
+
+Router.post('/admitstudents', adminAuth, upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  const filePath = req.file.path;
+
+  try {
+    // Read the file from the disk
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet);
+
+    for (const row of data) {
+      const applicationNumber = await generateApplicationNumber();
+
+      const query = `
+        INSERT INTO studentinfo (
+          applicationnumber, admissionnumber, registrationid, joiningdate, firstname, middlename, lastname,
+          studentaadhar, mobile, alternatemobile, personalemail, gender, dob, branch, joiningyear, quota,
+          admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, presentaddress,
+          presentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,
+          city, state, nationality, religion, caste, castecategory
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`;
+
+      const values = [
+        applicationNumber, row.admissionnumber, row.registrationid, row.joiningdate, row.firstname, row.middlename, row.lastname,
+        row.studentaadhar, row.mobile, row.alternatemobile, row.personalemail, row.gender, row.dob, row.branch, row.joiningyear, row.quota,
+        row.admissiontype, row.fathername, row.mothername, row.fatheraadhar, row.motheraadhar, row.scholarshipholder, row.presentaddress,
+        row.presentpincode, row.currentaddress, row.currentpincode, row.moa, row.remarks, row.entrancetype, row.entrancehallticket, row.rank,
+        row.city, row.state, row.nationality, row.religion, row.caste, row.castecategory
+      ];
+
+      await connection.query(query, values);
+    }
+
+    res.status(200).json({ message: 'Students added successfully' });
+  } catch (err) {
+    console.error('Error processing file:', err);
+    res.status(500).json({ error: 'Failed to add students', details: err.message });
+  }
+});
 
 export default Router;
 

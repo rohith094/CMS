@@ -12,6 +12,7 @@ import Deletestudent from "../pages/Deletestudent";
 import Welcomepage from "../pages/Welcomepage";
 import StudentSearch from "../pages/StudentSearch";
 import StudentDownload from "../pages/StudentDownload";
+import AdmitStudentForm from "../pages/AdmitStudentForm";
 function Studentcomponent() {
   
 
@@ -24,13 +25,14 @@ function Studentcomponent() {
         <div  className="overflow-y-scroll scroll-hidden downscroll"  style={{width : '87%', height : '100vh', display : 'flex' , justifyContent : 'center', alignItems: 'center'}}>
         <Routes>
           <Route path="" element={<Welcomepage />} />
-          <Route index path='addstudent' element={<Addstudent />} />
+          <Route index path='addstudent' element={<AdmitStudentForm />} />
           <Route path="addstudents" element={<Addstudents />} />
           <Route path="viewstudents" element={<StudentSearch />} />
           <Route path="viewstudents/:jntuno" element={<Singlestudent />} />
           <Route path="updatestudent/:jntuno" element={<UpdateStudent />} />
           <Route path="deletestudent/:jntuno" element={<Deletestudent />} />
           <Route path="downloadstudents" element={<StudentDownload />} />
+          
         </Routes>
         
         <Outlet />

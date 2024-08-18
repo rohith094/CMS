@@ -7,8 +7,8 @@ import { MdOutlineDeleteOutline } from "react-icons/md";
 
 const Semesters = () => {
   const [semesters, setSemesters] = useState([]);
-  const [loading, setLoading] = useState(false); // Track overall loading state
-  const [loadingSemester, setLoadingSemester] = useState(null); // Track loading for specific semester
+  const [loading, setLoading] = useState(false);
+  const [loadingSemester, setLoadingSemester] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,7 +16,7 @@ const Semesters = () => {
   }, []);
 
   const fetchSemesters = async () => {
-    setLoading(true); // Set loading to true when fetching begins
+    setLoading(true);
     try {
       const token = Cookies.get('admintoken');
       const response = await axios.get('http://localhost:3001/admin/viewsemesters', {
@@ -28,18 +28,18 @@ const Semesters = () => {
     } catch (error) {
       console.error('Error fetching semesters:', error);
     } finally {
-      setLoading(false); // Set loading to false when fetching is complete
+      setLoading(false);
     }
   };
 
-  const handleEdit = (semesterID) => {
-    navigate(`editsemester/${semesterID}`);
+  const handleEdit = (semesterid) => {
+    navigate(`editsemester/${semesterid}`);
   };
 
-  const handleDelete = async (semesterID) => {
+  const handleDelete = async (semesterid) => {
     try {
       const token = Cookies.get('admintoken');
-      await axios.delete(`http://localhost:3001/admin/deletesemester/${semesterID}`, {
+      await axios.delete(`http://localhost:3001/admin/deletesemester/${semesterid}`, {
         headers: {
           Authorization: `${token}`,
         },
@@ -50,13 +50,12 @@ const Semesters = () => {
     }
   };
 
-  const toggleActive = async (semesterID, currentStatus) => {
-    setLoadingSemester(semesterID); // Set loading state for this semester
+  const toggleActive = async (semesterid, currentStatus) => {
+    setLoadingSemester(semesterid);
     try {
       const token = Cookies.get('admintoken');
-      await axios.put(`
-        http://localhost:3001/admin/managesemester/${semesterID}`,
-        { SemesterActive: !currentStatus },
+      await axios.put(`http://localhost:3001/admin/managesemester/${semesterid}`, 
+        { semesteractive: !currentStatus },
         {
           headers: {
             Authorization: `${token}`,
@@ -67,7 +66,7 @@ const Semesters = () => {
     } catch (error) {
       console.error('Error toggling semester status:', error);
     } finally {
-      setLoadingSemester(null); // Reset loading state
+      setLoadingSemester(null);
     }
   };
 
@@ -98,32 +97,31 @@ const Semesters = () => {
         </div>
       </div>
       <div style={{ width: "97%" }} className="p-4">
-        {loading ? ( // Display loading indicator if semesters are being fetched
+        {loading ? (
           <div className="text-center">Loading semesters...</div>
         ) : (
           semesters.map((semester) => (
             <div
-              key={semester.SemesterID}
-              className={`p-2 mb-2 rounded ${semester.SemesterActive ? 'bg-green-300' : 'bg-red-300'}`}
+              key={semester.semesterid}
+              className={`p-2 mb-2 rounded ${semester.semesteractive ? 'bg-green-300' : 'bg-red-300'}`}
             >
               <div className="flex justify-between items-center p-2">
-                <p className='text-xl mr-4'>Semester {semester.SemesterNumber}</p>
+                <p className='text-xl mr-4'>{semester.semestername} :   {semester.batchyear} - {semester.batchyear + 4}</p>
                 <div className='flex items-center justify-center'>
-                  <p style={{ fontSize: "15px" }}>{formatDate(semester.StartDate)} -</p>
-                  <p style={{ fontSize: "15px" }}>{formatDate(semester.EndDate)}</p>
+                  <p style={{ fontSize: "15px" }}>{formatDate(semester.startdate)}</p>
+                  <p style={{ fontSize: "15px" }}>-{formatDate(semester.enddate)}</p>
                 </div>
                 <div className='flex justify-center gap-x-4 items-center'>
-                  <FaRegEdit className='cursor-pointer text-cyan-900 text-xl mr-2' onClick={() => handleEdit(semester.SemesterID)} />
-                  <MdOutlineDeleteOutline className='cursor-pointer text-cyan-900 text-xl mr-2' onClick={() => handleDelete(semester.SemesterID)} />
+                  <FaRegEdit className='cursor-pointer text-cyan-900 text-xl mr-2' onClick={() => handleEdit(semester.semesterid)} />
+                  <MdOutlineDeleteOutline className='cursor-pointer text-cyan-900 text-xl mr-2' onClick={() => handleDelete(semester.semesterid)} />
                   <button
-                    
-                    className={`bg-${semester.SemesterActive ? 'blue' : 'blue'}-500 hover:bg-${
-                      semester.SemesterActive ? 'blue' : 'blue'
+                    className={`bg-${semester.semesteractive ? 'blue' : 'blue'}-500 hover:bg-${
+                      semester.semesteractive ? 'blue' : 'blue'
                     }-700 text-white w-28 py-2 px-4 rounded`}
-                    onClick={() => toggleActive(semester.SemesterID, semester.SemesterActive)}
-                    disabled={loadingSemester === semester.SemesterID} // Disable button while loading
+                    onClick={() => toggleActive(semester.semesterid, semester.semesteractive)}
+                    disabled={loadingSemester === semester.semesterid}
                   >
-                    {loadingSemester === semester.SemesterID ? 'Loading...' : semester.SemesterActive ? 'Deactivate' : 'Activate'}
+                    {loadingSemester === semester.semesterid ? 'Loading...' : semester.semesteractive ? 'Deactivate' : 'Activate'}
                   </button>
                 </div>
               </div>

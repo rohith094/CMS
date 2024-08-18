@@ -6,22 +6,24 @@ import axios from 'axios';
 const EditSemester = () => {
   const { semesterID } = useParams();
   const [semesterNumber, setSemesterNumber] = useState('');
+  const [semesterName, setSemesterName] = useState(''); // Added field for semester name
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [batchYear, setBatchYear] = useState(''); // Added field for batch year
   const [semesterActive, setSemesterActive] = useState(false);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchSemester();
   }, []);
 
-  const goback = ()=>{
-    navigate('/admin/semesters')
-  }
+  const goback = () => {
+    navigate('/admin/semesters');
+  };
 
   const fetchSemester = async () => {
-    setLoading(true); // Set loading to true while fetching data
+    setLoading(true);
     try {
       const token = Cookies.get('admintoken');
       const response = await axios.get('http://localhost:3001/admin/viewsemesters', {
@@ -29,32 +31,36 @@ const EditSemester = () => {
           Authorization: `${token}`,
         },
       });
-      const semester = response.data.find((sem) => sem.SemesterID === parseInt(semesterID));
+      const semester = response.data.find((sem) => sem.semesterid === parseInt(semesterID));
       if (semester) {
-        setSemesterNumber(semester.SemesterNumber);
-        setStartDate(semester.StartDate);
-        setEndDate(semester.EndDate);
-        setSemesterActive(semester.SemesterActive);
+        setSemesterNumber(semester.semesternumber);
+        setSemesterName(semester.semestername);
+        setStartDate(semester.startdate);
+        setEndDate(semester.enddate);
+        setBatchYear(semester.batchyear);
+        setSemesterActive(semester.semesteractive === 1); // Assuming 1 is active
       }
     } catch (error) {
       console.error('Error fetching semester:', error);
     } finally {
-      setLoading(false); // Set loading to false after data is fetched
+      setLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Set loading to true when form is submitted
+    setLoading(true);
     try {
       const token = Cookies.get('admintoken');
       await axios.put(
         `http://localhost:3001/admin/editsemester/${semesterID}`,
         {
-          SemesterNumber: semesterNumber,
-          StartDate: startDate,
-          EndDate: endDate,
-          SemesterActive: semesterActive,
+          semesternumber: semesterNumber,
+          semestername: semesterName,
+          startdate: startDate,
+          enddate: endDate,
+          batchyear: batchYear,
+          semesteractive: semesterActive ? 1 : 0, // Convert boolean to integer
         },
         {
           headers: {
@@ -66,13 +72,13 @@ const EditSemester = () => {
     } catch (error) {
       console.error('Error updating semester:', error);
     } finally {
-      setLoading(false); // Set loading to false after request is complete
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen ">
-      <div className="w-full max-w-md bg-white p-8 rounded ">
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-full max-w-md bg-white p-8 rounded">
         <h1 className="text-2xl font-bold text-center mb-6">Edit Semester</h1>
         {loading ? (
           <div className="flex justify-center items-center">
@@ -86,6 +92,16 @@ const EditSemester = () => {
                 type="number"
                 value={semesterNumber}
                 onChange={(e) => setSemesterNumber(e.target.value)}
+                className="border rounded p-2 w-full"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-2">Semester Name:</label>
+              <input
+                type="text"
+                value={semesterName}
+                onChange={(e) => setSemesterName(e.target.value)}
                 className="border rounded p-2 w-full"
                 required
               />
@@ -110,6 +126,16 @@ const EditSemester = () => {
                 required
               />
             </div>
+            <div>
+              <label className="block mb-2">Batch Year:</label>
+              <input
+                type="number"
+                value={batchYear}
+                onChange={(e) => setBatchYear(e.target.value)}
+                className="border rounded p-2 w-full"
+                required
+              />
+            </div>
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -122,7 +148,7 @@ const EditSemester = () => {
             <button
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
-              disabled={loading} // Disable button while loading
+              disabled={loading}
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
@@ -131,11 +157,11 @@ const EditSemester = () => {
               )}
             </button>
             <button 
-          className='w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center'
-          onClick={()=>goback()}
-          >
-            Back
-          </button>
+              className='w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center'
+              onClick={goback}
+            >
+              Back
+            </button>
           </form>
         )}
       </div>
