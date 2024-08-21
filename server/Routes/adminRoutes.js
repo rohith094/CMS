@@ -618,12 +618,13 @@ Router.put('/managesemester/:semesterid', adminAuth, async (req, res) => {
 
 
 Router.post('/addbranch', adminAuth, async (req, res) => {
-  const { BranchName, HodName, BlockNumber } = req.body;
-  const query = 'INSERT INTO Branches (BranchName, HodName, BlockNumber) VALUES (?, ?, ?)';
+  const { branchcode, branchname, hodname, blocknumber, branchshortcut } = req.body;
+  const query = `INSERT INTO branches (branchcode, branchname, hodname, blocknumber, branchshortcut)
+                 VALUES (?, ?, ?, ?, ?)`;
 
   try {
-    const [result] = await connection.execute(query, [BranchName, HodName, BlockNumber]);
-    res.status(201).json({ BranchID: result.insertId, BranchName, HodName, BlockNumber });
+    const [result] = await connection.execute(query, [branchcode, branchname, hodname, blocknumber, branchshortcut]);
+    res.status(201).json({ branchid: result.insertId, branchcode, branchname, hodname, blocknumber, branchshortcut });
   } catch (error) {
     console.error('An error occurred while adding the branch:', error);
     res.status(500).send('An error occurred');
@@ -631,7 +632,7 @@ Router.post('/addbranch', adminAuth, async (req, res) => {
 });
 
 Router.get('/branches', adminAuth, async (req, res) => {
-  const query = 'SELECT * FROM Branches';
+  const query = 'SELECT * FROM branches';
 
   try {
     const [results] = await connection.execute(query);
@@ -642,8 +643,9 @@ Router.get('/branches', adminAuth, async (req, res) => {
   }
 });
 
+
 Router.get('/branch/:id', adminAuth, async (req, res) => {
-  const query = 'SELECT * FROM Branches WHERE BranchID = ?';
+  const query = 'SELECT * FROM branches WHERE branchid = ?';
 
   try {
     const [results] = await connection.execute(query, [req.params.id]);
@@ -658,18 +660,16 @@ Router.get('/branch/:id', adminAuth, async (req, res) => {
 });
 
 Router.put('/branch/:id', adminAuth, async (req, res) => {
-
-  const {branchId} = req.params;
-
-  const { BranchName, HodName, BlockNumber } = req.body;
-  const query = 'UPDATE Branches SET BranchName = ?, HodName = ?, BlockNumber = ? WHERE BranchID = ?';
+  const { branchname, hodname, blocknumber, branchshortcut } = req.body;
+  const query = `UPDATE branches SET branchname = ?, hodname = ?, blocknumber = ?, branchshortcut = ? 
+                 WHERE branchid = ?`;
 
   try {
-    const [result] = await connection.execute(query, [BranchName, HodName, BlockNumber, req.params.id]);
+    const [result] = await connection.execute(query, [branchname, hodname, blocknumber, branchshortcut, req.params.id]);
     if (result.affectedRows === 0) {
       return res.status(404).send('Branch not found');
     }
-    res.json({ BranchID: req.params.id, BranchName, HodName, BlockNumber });
+    res.json({ branchid: req.params.id, branchname, hodname, blocknumber, branchshortcut });
   } catch (error) {
     console.error('An error occurred while updating the branch:', error);
     res.status(500).send('An error occurred');
@@ -677,22 +677,22 @@ Router.put('/branch/:id', adminAuth, async (req, res) => {
 });
 
 Router.delete('/branch/:id', adminAuth, async (req, res) => {
-
-  const query = 'DELETE FROM Branches WHERE BranchID = ?';
+  const query = 'DELETE FROM branches WHERE branchid = ?';
 
   try {
     const [result] = await connection.execute(query, [req.params.id]);
     if (result.affectedRows === 0) {
       return res.status(404).send('Branch not found');
     }
-    res.status(200).send("delete successfull");
+    res.status(200).send("Delete successful");
   } catch (error) {
     console.error('An error occurred while deleting the branch:', error);
     res.status(500).send('An error occurred');
   }
 });
 
-// Sections 
+
+//sections
 
 Router.post('/addsection', adminAuth, async (req, res) => {
   const { SectionName, BranchID, SemesterID } = req.body;
@@ -956,6 +956,155 @@ Router.post('/admitstudents', adminAuth, upload.single('file'), async (req, res)
   } catch (err) {
     console.error('Error processing file:', err);
     res.status(500).json({ error: 'Failed to add students', details: err.message });
+  }
+});
+
+
+//Courses
+
+Router.post('/addcourse', adminAuth, async (req, res) => {
+  const { coursecode, coursename, coursecredits, semesternumber, branchcode, coursetype } = req.body;
+  const query = `INSERT INTO courses (coursecode, coursename, coursecredits, semesternumber, branchcode, coursetype)
+                 VALUES (?, ?, ?, ?, ?, ?)`;
+
+  try {
+    const [result] = await connection.execute(query, [coursecode, coursename, coursecredits, semesternumber, branchcode, coursetype]);
+    res.status(201).json({
+      courseid: result.insertId,
+      coursecode,
+      coursename,
+      coursecredits,
+      semesternumber,
+      branchcode,
+      coursetype
+    });
+  } catch (error) {
+    console.error('An error occurred while adding the course:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+
+Router.post('/addcourses', adminAuth, upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  const filePath = req.file.path;
+
+  try {
+    // Read the file from the disk
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet);
+
+    for (const row of data) {
+      // Check for missing fields
+      // if (!row.coursecode || !row.coursename || !row.coursecredits || !row.semesternumber || !row.branchcode || !row.coursetype) {
+      //   continue; // Skip rows with missing required fields
+      // }
+
+      // Insert course data into the database
+      const [existingCourse] = await connection.query(
+        'SELECT coursecode FROM courses WHERE coursecode = ?',
+        [row.coursecode]
+      );
+
+      if (existingCourse.length > 0) {
+        console.log(`Course with code ${row.coursecode} already exists. Skipping.`);
+        continue; // Skip inserting this row if coursecode already exists
+      }
+
+      
+      const query = `
+        INSERT INTO courses (
+          coursecode, coursename, coursecredits, semesternumber, branchcode, coursetype
+        ) VALUES (?, ?, ?, ?, ?, ?)`;
+
+      const values = [
+        row.coursecode, row.coursename, row.coursecredits, row.semesternumber, row.branchcode, row.coursetype
+      ];
+
+      await connection.query(query, values);
+    }
+
+    res.status(200).json({ message: 'Courses added successfully' });
+  } catch (err) {
+    console.error('Error processing file:', err);
+    res.status(500).json({ error: 'Failed to add courses', details: err.message });
+  } finally {
+    fs.unlinkSync(filePath); // Clean up the uploaded file
+  }
+});
+
+// Get all courses
+Router.get('/courses', adminAuth, async (req, res) => {
+  const query = 'SELECT * FROM courses';
+
+  try {
+    const [results] = await connection.execute(query);
+    res.json(results);
+  } catch (error) {
+    console.error('An error occurred while fetching courses:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+// Get a specific course by coursecode
+Router.get('/course/:coursecode', adminAuth, async (req, res) => {
+  const query = 'SELECT * FROM courses WHERE coursecode = ?';
+
+  try {
+    const [results] = await connection.execute(query, [req.params.coursecode]);
+    if (results.length === 0) {
+      return res.status(404).send('Course not found');
+    }
+    res.json(results[0]);
+  } catch (error) {
+    console.error('An error occurred while fetching the course:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+// Update a course by coursecode
+Router.put('/course/:coursecode', adminAuth, async (req, res) => {
+  const { coursename, coursecredits, semesternumber, branchcode, coursetype } = req.body;
+  const query = `UPDATE courses SET coursename = ?, coursecredits = ?, semesternumber = ?, branchcode = ?, coursetype = ? 
+                 WHERE coursecode = ?`;
+
+  try {
+    const [result] = await connection.execute(query, [coursename, coursecredits, semesternumber, branchcode, coursetype, req.params.coursecode]);
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Course not found');
+    }
+    res.json({
+      coursecode: req.params.coursecode,
+      coursename,
+      coursecredits,
+      semesternumber,
+      branchcode,
+      coursetype
+    });
+  } catch (error) {
+    console.error('An error occurred while updating the course:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+// Delete a course by coursecode
+Router.delete('/course/:coursecode', adminAuth, async (req, res) => {
+  const query = 'DELETE FROM courses WHERE coursecode = ?';
+
+  try {
+    const [result] = await connection.execute(query, [req.params.coursecode]);
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Course not found');
+    }
+    res.status(200).send('Course deleted successfully');
+  } catch (error) {
+    console.error('An error occurred while deleting the course:', error);
+    res.status(500).send('An error occurred');
   }
 });
 

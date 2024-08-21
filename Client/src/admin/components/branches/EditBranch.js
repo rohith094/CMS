@@ -4,19 +4,19 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 
 const EditBranch = () => {
-  const { branchID} = useParams(); 
-  console.log(branchID);
-  
+  const { branchID } = useParams(); 
   const navigate = useNavigate(); 
-  const goback = ()=>{
-    navigate('/admin/branches')
-  }
 
+  const goback = () => {
+    navigate('/admin/branches');
+  };
 
   const [formData, setFormData] = useState({
-    BranchName: '',
-    HodName: '',
-    BlockNumber: ''
+    branchcode: '',
+    branchname: '',
+    hodname: '',
+    blocknumber: '',
+    branchshortcut: ''
   });
 
   useEffect(() => {
@@ -29,9 +29,11 @@ const EditBranch = () => {
           },
         });
         setFormData({
-          BranchName: response.data.BranchName,
-          HodName: response.data.HodName,
-          BlockNumber: response.data.BlockNumber,
+          branchcode: response.data.branchcode,
+          branchname: response.data.branchname,
+          hodname: response.data.hodname,
+          blocknumber: response.data.blocknumber,
+          branchshortcut: response.data.branchshortcut
         });
       } catch (error) {
         console.error('Error fetching branch data:', error);
@@ -69,14 +71,26 @@ const EditBranch = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
-      <form onSubmit={handleEditBranch} className="bg-white p-8 rounded-lg  w-full max-w-md">
+      <form onSubmit={handleEditBranch} className="bg-white p-8 rounded-lg w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Edit Branch</h2>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">Branch Code:</label>
+          <input
+            type="text"
+            name="branchcode"
+            value={formData.branchcode}
+            onChange={handleInputChange}
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            readOnly
+          />
+        </div>
         <div className="mb-4">
           <label className="block text-gray-700 font-semibold mb-2">Branch Name:</label>
           <input
             type="text"
-            name="BranchName"
-            value={formData.BranchName}
+            name="branchname"
+            value={formData.branchname}
             onChange={handleInputChange}
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
@@ -86,21 +100,31 @@ const EditBranch = () => {
           <label className="block text-gray-700 font-semibold mb-2">Head of Department Name:</label>
           <input
             type="text"
-            name="HodName"
-            value={formData.HodName}
+            name="hodname"
+            value={formData.hodname}
             onChange={handleInputChange}
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
           />
         </div>
-        <div className="mb-6">
+        <div className="mb-4">
           <label className="block text-gray-700 font-semibold mb-2">Block Number:</label>
           <input
-            type="text"
-            name="BlockNumber"
-            value={formData.BlockNumber}
+            type="number"
+            name="blocknumber"
+            value={formData.blocknumber}
             onChange={handleInputChange}
             required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">Branch Shortcut:</label>
+          <input
+            type="text"
+            name="branchshortcut"
+            value={formData.branchshortcut}
+            onChange={handleInputChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
           />
         </div>
@@ -111,11 +135,12 @@ const EditBranch = () => {
           Update Branch
         </button>
         <button 
-          className=' mt-2 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center'
-          onClick={()=>goback()}
-          >
-            Back
-          </button>
+          type="button"
+          className="mt-2 w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition duration-300"
+          onClick={goback}
+        >
+          Back
+        </button>
       </form>
     </div>
   );

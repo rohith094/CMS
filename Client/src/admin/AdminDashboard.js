@@ -15,6 +15,7 @@ import Feedbacks from "./Feedbacks";
 import SemesterComponent from "./components/SemesterComponent";
 import SectionComponent from "./components/SectionComponent";
 import BranchComponent from "./components/BranchComponent";
+import CourseComponent from "./components/CourseComponent";
 
 function AdminDashboard() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -185,6 +186,7 @@ function AdminDashboard() {
           <Route path="semesters/*" element={<SemesterComponent />} />
           <Route path="branches/*" element={<BranchComponent />} />
           <Route path="sections/*" element={<SectionComponent />} />
+          <Route path="courses/*" element={<CourseComponent />} />
         </Routes>
         <Outlet />
       </div>

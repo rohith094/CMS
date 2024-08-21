@@ -74,3 +74,27 @@ CREATE TABLE semesters (
     enddate DATE NOT NULL,
     batchyear int not null,
     semesteractive int NOT NULL );
+
+
+CREATE TABLE branches (
+    branchid INT UNIQUE AUTO_INCREMENT,
+    branchcode VARCHAR(20) PRIMARY KEY NOT NULL,
+    branchname VARCHAR(100) NOT NULL,
+    hodname VARCHAR(100),
+    blocknumber INT,
+    branchshortcut VARCHAR(20)
+);
+
+
+CREATE TABLE courses (
+    courseid INT UNIQUE AUTO_INCREMENT,
+    coursecode VARCHAR(20) PRIMARY KEY NOT NULL,
+    coursename VARCHAR(255) NOT NULL,
+    coursecredits INT NOT NULL,
+    semesternumber INT,
+    branchcode VARCHAR(20),
+    coursetype varchar(50),
+    FOREIGN KEY (semesternumber) REFERENCES semesters(semesternumber),
+    FOREIGN KEY (branchcode) REFERENCES branches(branchcode)
+);
+

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-
+import './view.css';
 const AdmitStudentForm = () => {
   const [formData, setFormData] = useState({
     admissionnumber: '',
@@ -66,7 +66,7 @@ const AdmitStudentForm = () => {
   };
 
   return (
-    <div style={{height : '100vh', overflowY : 'scroll'}} className="container mx-auto p-5 w-full">
+    <div style={{height : '100vh', overflowY : 'scroll'}} className="container mx-auto p-5 w-full downscroll">
       <form onSubmit={handleSubmit} className="bg-white p-5 rounded-lg ">
         <h2 className="text-2xl font-bold mb-5 text-center">Admission Form</h2>
 

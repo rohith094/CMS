@@ -5,15 +5,18 @@ import { useNavigate } from 'react-router-dom';
 
 const AddBranch = () => {
   const [formData, setFormData] = useState({
-    BranchName: '',
-    HodName: '',
-    BlockNumber: ''
+    branchcode: '',
+    branchname: '',
+    hodname: '',
+    blocknumber: '',
+    branchshortcut: ''
   });
-  
+
   const navigate = useNavigate(); 
-  const goback = ()=>{
-    navigate('/admin/branches')
-  }
+
+  const goback = () => {
+    navigate('/admin/branches');
+  };
 
   const handleInputChange = (e) => {
     setFormData({
@@ -35,8 +38,14 @@ const AddBranch = () => {
           },
         }
       );
-      setFormData({ BranchName: '', HodName: '', BlockNumber: '' }); // Reset form after successful addition
-      navigate('/admin/branches'); // Navigate to /admin/branches after adding a branch
+      setFormData({
+        branchcode: '',
+        branchname: '',
+        hodname: '',
+        blocknumber: '',
+        branchshortcut: ''
+      }); 
+      navigate('/admin/branches'); 
     } catch (error) {
       console.error('Error adding branch:', error);
     }
@@ -44,14 +53,25 @@ const AddBranch = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
-      <form onSubmit={handleAddBranch} className="bg-white p-8 rounded-lg  w-full max-w-md">
+      <form onSubmit={handleAddBranch} className="bg-white p-8 rounded-lg w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Add Branch</h2>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">Branch Code:</label>
+          <input
+            type="text"
+            name="branchcode"
+            value={formData.branchcode}
+            onChange={handleInputChange}
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
         <div className="mb-4">
           <label className="block text-gray-700 font-semibold mb-2">Branch Name:</label>
           <input
             type="text"
-            name="BranchName"
-            value={formData.BranchName}
+            name="branchname"
+            value={formData.branchname}
             onChange={handleInputChange}
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
@@ -61,21 +81,31 @@ const AddBranch = () => {
           <label className="block text-gray-700 font-semibold mb-2">Head of Department Name:</label>
           <input
             type="text"
-            name="HodName"
-            value={formData.HodName}
+            name="hodname"
+            value={formData.hodname}
             onChange={handleInputChange}
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
           />
         </div>
-        <div className="mb-6">
+        <div className="mb-4">
           <label className="block text-gray-700 font-semibold mb-2">Block Number:</label>
           <input
-            type="text"
-            name="BlockNumber"
-            value={formData.BlockNumber}
+            type="number"
+            name="blocknumber"
+            value={formData.blocknumber}
             onChange={handleInputChange}
             required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">Branch Shortcut:</label>
+          <input
+            type="text"
+            name="branchshortcut"
+            value={formData.branchshortcut}
+            onChange={handleInputChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
           />
         </div>
@@ -87,11 +117,12 @@ const AddBranch = () => {
         </button>
 
         <button 
-          className=' mt-2 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center'
-          onClick={()=>goback()}
-          >
-            Back
-          </button>
+          type="button"
+          className="mt-2 w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition duration-300"
+          onClick={goback}
+        >
+          Back
+        </button>
       </form>
     </div>
   );
