@@ -4,6 +4,7 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import { FaRegEdit } from 'react-icons/fa';
 import { MdOutlineDeleteOutline } from "react-icons/md";
+import { Link } from 'react-router-dom';
 
 const Branches = () => {
   const [branches, setBranches] = useState([]);
@@ -65,16 +66,14 @@ const Branches = () => {
           <div className="text-center">Loading branches...</div>
         ) : (
           branches.map((branch) => (
+            <>
+            <Link to={`/admin/branch/${branch.branchcode}`}>
             <div
               key={branch.BranchID}
               className="p-2 mb-2 rounded bg-gray-200"
             >
               <div className="flex justify-between items-center p-2">
                 <p className='text-xl mr-4'>{branch.branchname}</p>
-                <div className='flex justify-center gap-x-4 items-center'>
-                  <FaRegEdit className='cursor-pointer text-cyan-900 text-xl mr-2' onClick={() => handleEdit(branch.BranchID)} />
-                  <MdOutlineDeleteOutline className='cursor-pointer text-cyan-900 text-xl mr-2' onClick={() => handleDelete(branch.BranchID)} />
-                </div>
               </div>
               <div className="p-2">
                 <p>{branch.branchcode}</p>
@@ -82,6 +81,8 @@ const Branches = () => {
                 <p>Block Number: {branch.blocknumber}</p>
               </div>
             </div>
+            </Link>
+            </>
           ))
         )}
       </div>

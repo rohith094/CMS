@@ -15,7 +15,7 @@ router.post("/login", async (req, res) => {
     return res.json({"error" : "email and password are required"});
   }
   
-  const query = "SELECT * FROM students WHERE email = ?";
+  const query = "SELECT * FROM studentinfo WHERE personalemail = ?";
 
   try {
     // Check if the student exists with the given email
@@ -27,9 +27,10 @@ router.post("/login", async (req, res) => {
     }
 
     const student = results[0];
+    console.log(student);
 
     // Compare the provided password with the stored hashed password
-    const passwordMatch = await bcrypt.compare(password, student.spassword);
+    const passwordMatch = await bcrypt.compare(password, student.studentpassword);
     if (!passwordMatch) {
       // return res.status(401).send("password doesnot match");
       return res.json({"error" : "password not match"});

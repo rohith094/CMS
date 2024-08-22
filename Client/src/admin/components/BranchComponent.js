@@ -10,7 +10,6 @@ const BranchComponent = () => {
         
         <Routes>
           <Route path="" element={<Branches/>} />
-          
           <Route path="addbranch" element={<AddBranch/>}/>
           <Route path="editbranch/:branchID" element={<EditBranch/>} />
         </Routes>

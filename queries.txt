@@ -90,11 +90,12 @@ CREATE TABLE courses (
     courseid INT UNIQUE AUTO_INCREMENT,
     coursecode VARCHAR(20) PRIMARY KEY NOT NULL,
     coursename VARCHAR(255) NOT NULL,
-    coursecredits INT NOT NULL,
-    semesternumber INT,
-    branchcode VARCHAR(20),
+    alternativename varchar(255),
+    coursedescription text,
     coursetype varchar(50),
-    FOREIGN KEY (semesternumber) REFERENCES semesters(semesternumber),
-    FOREIGN KEY (branchcode) REFERENCES branches(branchcode)
+    coursecredits float NOT NULL,
+    learninghours float not null,
+    totalcoursecredits float not null,
+    branchcode varchar(20)
 );
 

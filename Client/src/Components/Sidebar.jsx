@@ -98,11 +98,11 @@ const Sidebar = () => {
                 </div>
                 <div className="ml-3 text-white text-1xl text-left">
                 <span className="text-lg text-blue-100">Hello,</span><br />
-                <span style={{ textTransform: 'uppercase' }}>{userData.jntuno}</span>
+                <span style={{ textTransform: 'uppercase' }}>{userData.registrationid}</span>
               </div>
               </div>
               <div style={{ width: '100%', display: 'flex', justifyContent: 'left', alignItems: 'flex-start', flexDirection: 'column', marginTop: '5px', paddingLeft: '8px' }}>
-                <span style={{ fontSize: '13px', textTransform: 'capitalize' }} className='text-white'>{userData.firstname} {userData.lastname}</span>
+                <span style={{ fontSize: '13px', textTransform: 'capitalize' }} className='text-white'>{userData.nameasperssc}</span>
                 <span style={{ fontSize: '13px' }} className='text-white'>B.Tech {userData.branch}</span>
               </div>
 

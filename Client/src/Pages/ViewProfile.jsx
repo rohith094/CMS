@@ -54,8 +54,8 @@ const ViewProfile = () => {
                         className="w-32 h-32 rounded-2xl object-cover border-2  border-plat"
                     />
                     <div className="ml-6">
-                        <div className="text-xl sm:text-4xl md:text-4xl lg:text-4xl font-semibold text-white">{userData.firstname} {userData.lastname}</div>
-                        <div className="text-plat text-md sm:text-xl md:text-xl lg:text-xl">{userData.jntuno}</div>
+                        <div className="text-xl sm:text-4xl md:text-4xl lg:text-4xl font-semibold text-white">{userData.nameasperssc}</div>
+                        <div className="text-plat text-md sm:text-xl md:text-xl lg:text-xl">{userData.registrationid}</div>
                     </div>
                 </div>
 
@@ -63,7 +63,7 @@ const ViewProfile = () => {
                     <div className="">
                         <div className="flex items-center justify-between mt-3">
                             <label className="w-40 font-semibold text-gray-900">Email:</label>
-                            <span className="text-gray-700">{userData.email}</span>
+                            <span className="text-gray-700">{userData.personalemail}</span>
                         </div>
                          <div className='relative'>
                             <hr className="absolute inset-0 border-none h-[1px] bg-gradient-to-r from-d3 via-d0 to-transparent" />

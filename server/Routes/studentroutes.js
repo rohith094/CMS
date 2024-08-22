@@ -39,7 +39,7 @@ const transporter = nodemailer.createTransport({
 
 
 Router.get('/singlestudent', authRoute, async (req, res) => {
-  const query = 'SELECT * FROM students WHERE email = ?';
+  const query = 'SELECT * FROM studentinfo WHERE personalemail = ?';
 
   try {
     const [results] = await connection.execute(query, [req.user]);

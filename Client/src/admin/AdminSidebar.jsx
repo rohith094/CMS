@@ -90,6 +90,16 @@ const Sidebar = () => {
             </li>
             <li>
               <NavLink
+                to="/admin/admissions"
+                className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group active"}
+                onClick={closeSidebar}
+              >
+                <CgProfile className="h-[20px] w-[20px]" />
+                <span className="ms-3">Admissions</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
                 to="/admin/semesters"
                 className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group active"}
                 onClick={closeSidebar}

@@ -120,7 +120,7 @@ const AdmitStudentForm = () => {
       });
       console.log('Student admitted successfully:', response.data);
       toast.success("student added succesfully");
-      navigate('/admin/studentsdata');
+      // navigate('/admin/studentsdata');
 
     } catch (error) {
       console.error('Error admitting student:', error.response?.data || error.message);

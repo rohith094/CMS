@@ -1,55 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const AddCourse = () => {
+  const {branchcode} = useParams();
   const [formData, setFormData] = useState({
     coursecode: '',
     coursename: '',
+    alternativename: '',
+    coursedescription: '',
     coursecredits: '',
-    semesternumber: '',
-    branchcode: '',
+    learninghours: '',
+    totalcoursecredits: '',
+    branchcode: branchcode,
     coursetype: ''
   });
-  const [semesters, setSemesters] = useState([]);
   const [branches, setBranches] = useState([]);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Fetch semesters and branches for dropdowns
-    const fetchSemesters = async () => {
-      try {
-        const token = Cookies.get('admintoken');
-        const response = await axios.get('http://localhost:3001/admin/allsemesters', {
-          headers: {
-            Authorization: `${token}`,
-          },
-        });
-        setSemesters(response.data);
-      } catch (error) {
-        console.error('Error fetching semesters:', error);
-      }
-    };
-
-    const fetchBranches = async () => {
-      try {
-        const token = Cookies.get('admintoken');
-        const response = await axios.get('http://localhost:3001/admin/branches', {
-          headers: {
-            Authorization: `${token}`,
-          },
-        });
-        setBranches(response.data);
-      } catch (error) {
-        console.error('Error fetching branches:', error);
-      }
-    };
-
-    fetchSemesters();
-    fetchBranches();
-  }, []);
 
   const goback = () => {
     navigate('/admin/courses');
@@ -78,8 +47,11 @@ const AddCourse = () => {
       setFormData({
         coursecode: '',
         coursename: '',
+        alternativename: '',
+        coursedescription: '',
         coursecredits: '',
-        semesternumber: '',
+        learninghours: '',
+        totalcoursecredits: '',
         branchcode: '',
         coursetype: ''
       });
@@ -116,6 +88,25 @@ const AddCourse = () => {
           />
         </div>
         <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">Alternative Name:</label>
+          <input
+            type="text"
+            name="alternativename"
+            value={formData.alternativename}
+            onChange={handleInputChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">Course Description:</label>
+          <textarea
+            name="coursedescription"
+            value={formData.coursedescription}
+            onChange={handleInputChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div className="mb-4">
           <label className="block text-gray-700 font-semibold mb-2">Course Credits:</label>
           <input
             type="number"
@@ -127,38 +118,26 @@ const AddCourse = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-2">Semester Number:</label>
-          <select
-            name="semesternumber"
-            value={formData.semesternumber}
+          <label className="block text-gray-700 font-semibold mb-2">Learning Hours:</label>
+          <input
+            type="number"
+            name="learninghours"
+            value={formData.learninghours}
             onChange={handleInputChange}
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-          >
-            <option value="">Select Semester</option>
-            {semesters.map((semester) => (
-              <option key={semester.semesternumber} value={semester.semesternumber}>
-                {semester.semesternumber} - {semester.semestername}
-              </option>
-            ))}
-          </select>
+          />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-2">Branch Code:</label>
-          <select
-            name="branchcode"
-            value={formData.branchcode}
+          <label className="block text-gray-700 font-semibold mb-2">Total Course Credits:</label>
+          <input
+            type="number"
+            name="totalcoursecredits"
+            value={formData.totalcoursecredits}
             onChange={handleInputChange}
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-          >
-            <option value="">Select Branch</option>
-            {branches.map((branch) => (
-              <option key={branch.branchcode} value={branch.branchcode}>
-                {branch.branchcode} - {branch.branchname}
-              </option>
-            ))}
-          </select>
+          />
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 font-semibold mb-2">Course Type:</label>
