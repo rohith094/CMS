@@ -847,18 +847,45 @@ const generateApplicationNumber = async () => {
   }
 };
 
+const generateRegistrationNumber = async (branchCode, joiningYear) => {
+  try {
+    // Fetch the branch name based on the branch code
+    const [branchResults] = await connection.query(
+      'SELECT branchshortcut FROM branches WHERE branchcode = ?',
+      [branchCode]
+    );
+
+    if (branchResults.length === 0) {
+      throw new Error(`Branch with code ${branchCode} not found`);
+    }
+
+    const branchName = branchResults[0].branchshortcut;
+
+    // Query to count existing registrations for the specific branch and year
+    const [countResults] = await connection.query(
+      `SELECT COUNT(*) AS count FROM studentinfo WHERE registrationid LIKE ?`,
+      [`${branchName}-${joiningYear}-%`]
+    );
+
+    const count = countResults[0].count + 1;
+    const paddedCount = count.toString().padStart(3, '0');
+    const registrationNumber = `${branchName}-${joiningYear}-${paddedCount}`;
+
+    return registrationNumber;
+  } catch (err) {
+    console.error('Error generating registration number:', err);
+    throw err; // Re-throw the error to be handled by the calling function
+  }
+};
+
+
 // Route to admit a student
 Router.post('/admitstudent', adminAuth, async (req, res) => {
   try {
     const applicationNumber = await generateApplicationNumber();
-
     const {
-      admissionnumber,
-      registrationid,
       joiningdate,
-      firstname,
-      middlename,
-      lastname,
+      nameasperssc,
       studentaadhar,
       mobile,
       alternatemobile,
@@ -891,17 +918,18 @@ Router.post('/admitstudent', adminAuth, async (req, res) => {
       castecategory
     } = req.body;
 
+    const registrationnumber = await generateRegistrationNumber(branch, joiningyear);
     const query = `
       INSERT INTO studentinfo (
-        applicationnumber, admissionnumber, registrationid, joiningdate, firstname, middlename, lastname,
+        applicationnumber, admissionnumber, registrationid, joiningdate, nameasperssc,
         studentaadhar, mobile, alternatemobile, personalemail, gender, dob, branch, joiningyear, quota,
         admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, presentaddress,
         presentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,
         city, state, nationality, religion, caste, castecategory
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`;
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const values = [
-      applicationNumber, admissionnumber, registrationid, joiningdate, firstname, middlename, lastname,
+      applicationNumber, registrationnumber, registrationnumber, joiningdate, nameasperssc,
       studentaadhar, mobile, alternatemobile, personalemail, gender, dob, branch, joiningyear, quota,
       admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, presentaddress,
       presentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,

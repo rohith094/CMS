@@ -1,16 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import './view.css';
+import { useNavigate } from 'react-router-dom';
 const AdmitStudentForm = () => {
+
+  const [branches, setBranches] = useState([]);
+  const year = new Date().getFullYear();
+  const navigate = useNavigate();
+
+
+  const statesInIndia = [
+    'Andhra Pradesh',
+    'Arunachal Pradesh',
+    'Assam',
+    'Bihar',
+    'Chhattisgarh',
+    'Goa',
+    'Gujarat',
+    'Haryana',
+    'Himachal Pradesh',
+    'Jharkhand',
+    'Karnataka',
+    'Kerala',
+    'Madhya Pradesh',
+    'Maharashtra',
+    'Manipur',
+    'Meghalaya',
+    'Mizoram',
+    'Nagaland',
+    'Odisha',
+    'Punjab',
+    'Rajasthan',
+    'Sikkim',
+    'Tamil Nadu',
+    'Telangana',
+    'Tripura',
+    'Uttar Pradesh',
+    'Uttarakhand',
+    'West Bengal',
+    'Andaman and Nicobar Islands',
+    'Chandigarh',
+    'Dadra and Nagar Haveli and Daman and Diu',
+    'Lakshadweep',
+    'Delhi',
+    'Puducherry',
+    'Ladakh',
+    'Jammu and Kashmir'
+  ];
+
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const token = Cookies.get('admintoken');
+        const response = await axios.get('http://localhost:3001/admin/branches', {
+          headers: {
+            Authorization: `${token}`,
+          },
+        });
+        setBranches(response.data);
+      } catch (error) {
+        console.error('Error fetching branches:', error);
+      }
+    };
+    fetchBranches();
+  }, []);
+
   const [formData, setFormData] = useState({
-    admissionnumber: '',
-    registrationid: '',
     joiningdate: '',
-    firstname: '',
-    middlename: '',
-    lastname: '',
+    nameasperssc: '',
     studentaadhar: '',
     mobile: '',
     alternatemobile: '',
@@ -43,6 +102,8 @@ const AdmitStudentForm = () => {
     castecategory: ''
   });
 
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -59,6 +120,8 @@ const AdmitStudentForm = () => {
       });
       console.log('Student admitted successfully:', response.data);
       toast.success("student added succesfully");
+      navigate('/admin/studentsdata');
+
     } catch (error) {
       console.error('Error admitting student:', error.response?.data || error.message);
       toast.error("an error occured")
@@ -66,27 +129,11 @@ const AdmitStudentForm = () => {
   };
 
   return (
-    <div style={{height : '100vh', overflowY : 'scroll'}} className="container mx-auto p-5 w-full downscroll">
+    <div style={{ height: '100vh', overflowY: 'scroll' }} className="container mx-auto p-5 w-full downscroll">
       <form onSubmit={handleSubmit} className="bg-white p-5 rounded-lg ">
         <h2 className="text-2xl font-bold mb-5 text-center">Admission Form</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <input
-            type="text"
-            name="admissionnumber"
-            placeholder="Admission Number"
-            value={formData.admissionnumber}
-            onChange={handleChange}
-            className="p-3 border rounded w-full"
-          />
-          <input
-            type="text"
-            name="registrationid"
-            placeholder="Registration ID"
-            value={formData.registrationid}
-            onChange={handleChange}
-            className="p-3 border rounded w-full"
-          />
           <label className="p-3 border rounded w-full bg-black text-white" >Joining date </label>
           <input
             type="date"
@@ -98,25 +145,9 @@ const AdmitStudentForm = () => {
           />
           <input
             type="text"
-            name="firstname"
-            placeholder="First Name"
-            value={formData.firstname}
-            onChange={handleChange}
-            className="p-3 border rounded w-full"
-          />
-          <input
-            type="text"
-            name="middlename"
-            placeholder="Middle Name"
-            value={formData.middlename}
-            onChange={handleChange}
-            className="p-3 border rounded w-full"
-          />
-          <input
-            type="text"
-            name="lastname"
-            placeholder="Last Name"
-            value={formData.lastname}
+            name="nameasperssc"
+            placeholder="Fullname as per SSC"
+            value={formData.nameasperssc}
             onChange={handleChange}
             className="p-3 border rounded w-full"
           />
@@ -172,38 +203,54 @@ const AdmitStudentForm = () => {
             onChange={handleChange}
             className="p-3 border rounded w-full"
           />
-          <input
-            type="text"
+          <select
             name="branch"
-            placeholder="Branch"
-            value={formData.branch}
+            value={formData.branchcode}
             onChange={handleChange}
             className="p-3 border rounded w-full"
-          />
-          <input
-            type="number"
+          >
+            <option value="">Select Branch</option>
+            {branches.map((branch) => (
+              <option key={branch.branchcode} value={branch.branchcode}>
+                {branch.branchname}
+              </option>
+            ))}
+          </select>
+          <select
             name="joiningyear"
-            placeholder="Joining Year"
             value={formData.joiningyear}
             onChange={handleChange}
             className="p-3 border rounded w-full"
-          />
-          <input
-            type="text"
+          >
+            <option value="">Select year</option>
+            <option value={year - 2}>{year - 2}</option>
+            <option value={year - 1}>{year - 1}</option>
+            <option value={year}>{year}</option>
+            <option value={year + 1}>{year + 1}</option>
+            <option value={year + 2}>{year + 2}</option>
+          </select>
+          <select
             name="quota"
-            placeholder="Quota"
             value={formData.quota}
             onChange={handleChange}
             className="p-3 border rounded w-full"
-          />
-          <input
-            type="text"
+          >
+            <option value="">Select quota</option>
+            <option value="convenor">Convenor</option>
+            <option value="management">Management</option>
+            <option value="lateral">Lateral</option>
+          </select>
+          <select
             name="admissiontype"
-            placeholder="Admission Type"
             value={formData.admissiontype}
             onChange={handleChange}
             className="p-3 border rounded w-full"
-          />
+          >
+            <option value="">Select Admission Type</option>
+            <option value="general">General</option>
+            <option value="management">Management</option>
+            <option value="lateral">Lateral Entry</option>
+          </select>
           <input
             type="text"
             name="fathername"
@@ -236,11 +283,10 @@ const AdmitStudentForm = () => {
             onChange={handleChange}
             className="p-3 border rounded w-full"
           />
-    
         </div>
 
         <div className="grid grid-cols-1 gap-4 mb-4">
-        <select
+          <select
             name="scholarshipholder"
             value={formData.scholarshipholder}
             onChange={handleChange}
@@ -280,14 +326,20 @@ const AdmitStudentForm = () => {
             onChange={handleChange}
             className="p-3 border rounded w-full"
           />
-          <input
-            type="text"
+          <select
             name="moa"
-            placeholder="Mode Of Admission(MOA)"
             value={formData.moa}
             onChange={handleChange}
             className="p-3 border rounded w-full"
-          />
+          >
+            <option value="">Select mode of admission</option>
+            <option value="convenor">Convenor</option>
+            <option value="management">Management</option>
+            <option value="lateral">Lateral</option>
+            <option value="convenorspot">Convenor Spot</option>
+            <option value="managementspot">Management Spot</option>
+            <option value="lateralspot">Lateral Spot</option>
+          </select>
           <input
             type="text"
             name="remarks"
@@ -296,14 +348,19 @@ const AdmitStudentForm = () => {
             onChange={handleChange}
             className="p-3 border rounded w-full"
           />
-          <input
-            type="text"
+
+          <select
             name="entrancetype"
-            placeholder="Entrance Type"
             value={formData.entrancetype}
             onChange={handleChange}
             className="p-3 border rounded w-full"
-          />
+          >
+            <option value="">Select Entrance type</option>
+            <option value="eamcet">EAMCET</option>
+            <option value="ecet">ECET</option>
+            <option value="pgecet">PGECET</option>
+            <option value="gate">GATE</option>
+          </select>
           <input
             type="text"
             name="entrancehallticket"
@@ -328,14 +385,19 @@ const AdmitStudentForm = () => {
             onChange={handleChange}
             className="p-3 border rounded w-full"
           />
-          <input
-            type="text"
+          <select
             name="state"
-            placeholder="State"
             value={formData.state}
             onChange={handleChange}
             className="p-3 border rounded w-full"
-          />
+          >
+            <option value="">Select state</option>
+            {statesInIndia.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
           <input
             type="text"
             name="nationality"
@@ -344,14 +406,17 @@ const AdmitStudentForm = () => {
             onChange={handleChange}
             className="p-3 border rounded w-full"
           />
-          <input
-            type="text"
+          <select
             name="religion"
-            placeholder="Religion"
             value={formData.religion}
             onChange={handleChange}
             className="p-3 border rounded w-full"
-          />
+          >
+            <option value="">Select Religion</option>
+            <option value="hindu">Hindu</option>
+            <option value="muslim">Muslim</option>
+            <option value="christian">Christian</option>
+          </select>
           <input
             type="text"
             name="caste"
@@ -360,14 +425,21 @@ const AdmitStudentForm = () => {
             onChange={handleChange}
             className="p-3 border rounded w-full"
           />
-          <input
-            type="text"
+          <select
             name="castecategory"
-            placeholder="Caste Category"
-            value={formData.castecategory}
+            value={formData.castecategory} 
             onChange={handleChange}
             className="p-3 border rounded w-full"
-          />
+          >
+            <option value="">Select Castecategory</option>
+            <option value="oc">OC</option>
+            <option value="bcd">BC-D</option>
+            <option value="bcb">BC-B</option>
+            <option value="bcc">BC-C</option>
+            <option value="bca">BC-A</option>
+            <option value="sc">SC</option>
+            <option value="st">ST</option>
+          </select>
         </div>
 
         <div className="flex justify-center">
