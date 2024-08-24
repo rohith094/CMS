@@ -569,14 +569,21 @@ Router.put('/student/:registrationid', adminAuth, async (req, res) => {
 });
 
 //studentbulk update 
-Router.put('/students/bulkupdate', adminAuth, async (req, res) => {
+Router.put('/students/bulkupdate',adminAuth, upload.single('excelFile'), async (req, res) => {
   try {
-    const file = req.files.excelFile; // Assuming you're using a package like express-fileupload
-    const workbook = xlsx.read(file.data, { type: 'buffer' });
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = xlsx.utils.sheet_to_json(worksheet);
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
 
-    for (const row of rows) {
+    const filePath = req.file.path;
+
+    // Read the file using xlsx.readFile
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet);
+
+    for (const row of data) {
       const registrationid = row.registrationid; // Assuming the first column is always the primary key
       delete row.registrationid; // Remove primary key from the fields to update
 
@@ -601,9 +608,12 @@ Router.put('/students/bulkupdate', adminAuth, async (req, res) => {
       const [result] = await connection.execute(query, values);
 
       if (result.affectedRows === 0) {
-        console.warn(`No student found with registrationid ${registrationid}`);
+        console.warn(`No student found with registrationid ${registrationid}`); 
       }
     }
+
+    // Clean up the uploaded file
+    fs.unlinkSync(filePath);
 
     res.status(200).json({ message: 'Bulk update successful' });
   } catch (error) {
@@ -698,6 +708,50 @@ Router.get('/admissionstudents/:joiningyear/:branchcode?', adminAuth, async (req
   }
 });
 
+//analytics route 
+
+Router.get('/student-analytics',adminAuth, async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        joiningyear,
+        gender,
+        COUNT(*) as count
+      FROM 
+        studentinfo
+      WHERE 
+        joiningyear >= YEAR(CURDATE()) - 4
+      GROUP BY 
+        joiningyear, gender
+      ORDER BY 
+        joiningyear ASC;
+    `;
+
+    const [rows] = await connection.query(query);
+
+    // Process data to fit the format needed for the graphs
+    const barGraphData = {};
+    const lineGraphData = {};
+
+    rows.forEach(row => {
+      const { joiningyear, gender, count } = row;
+      if (!barGraphData[joiningyear]) {
+        barGraphData[joiningyear] = { male: 0, female: 0 };
+      }
+      barGraphData[joiningyear][gender.toLowerCase()] = count;
+
+      if (!lineGraphData[joiningyear]) {
+        lineGraphData[joiningyear] = 0;
+      }
+      lineGraphData[joiningyear] += count;
+    });
+
+    res.json({ barGraphData, lineGraphData });
+  } catch (error) {
+    console.error('Error fetching student analytics:', error);
+    res.status(500).json({ error: 'Failed to fetch student analytics' });
+  }
+});
 
 
 //Courses

@@ -1,98 +1,90 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Pie, Bar } from 'react-chartjs-2';
-import 'tailwindcss/tailwind.css';
-import { Chart, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import Cookies from 'js-cookie';
-
-Chart.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+import { Bar, Line } from 'react-chartjs-2';
+import 'chart.js/auto';
+import Cookies from 'js-cookie'; // Necessary for using react-chartjs-2 with Chart.js v3
 
 const Welcomepage = () => {
-  const [branchData, setBranchData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [barData, setBarData] = useState(null);
+  const [lineData, setLineData] = useState(null);
+  const admintoken = Cookies.get('admintoken');
 
   useEffect(() => {
-    const fetchBranchwiseData = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/admin/allstudents/branchwise', {
+        const response = await axios.get('http://localhost:3001/admin/student-analytics', {
           headers: {
-            'Authorization': `${Cookies.get('admintoken')}`
+            Authorization: `${admintoken}`
           }
         });
-        setBranchData(response.data);
+        const { barGraphData, lineGraphData } = response.data;
+
+        // Prepare data for Bar Chart
+        const barChartLabels = Object.keys(barGraphData);
+        const maleCounts = barChartLabels.map(year => barGraphData[year].male);
+        const femaleCounts = barChartLabels.map(year => barGraphData[year].female);
+
+        setBarData({
+          labels: barChartLabels,
+          datasets: [
+            {
+              label: 'Male',
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              data: maleCounts,
+            },
+            {
+              label: 'Female',
+              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+              data: femaleCounts,
+            },
+          ],
+        });
+
+        // Prepare data for Line Chart
+        const lineChartLabels = Object.keys(lineGraphData);
+        const studentCounts = lineChartLabels.map(year => lineGraphData[year]);
+
+        setLineData({
+          labels: lineChartLabels,
+          datasets: [
+            {
+              label: 'Total Students',
+              fill: false,
+              borderColor: 'rgba(75, 192, 192, 1)',
+              data: studentCounts,
+            },
+          ],
+        });
       } catch (error) {
-        setError(error.response ? error.response.data : 'An error occurred');
-      } finally {
-        setLoading(false);
+        console.error('Error fetching student analytics:', error);
       }
     };
 
-    fetchBranchwiseData();
-  }, []);
-
-  const getChartData = () => {
-    const labels = branchData.map(branch => branch.branch);
-    const data = branchData.map(branch => branch.count);
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: 'Number of Students',
-          data,
-          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
-          hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
-        }
-      ]
-    };
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-red-500">{error}</p>
-      </div>
-    );
-  }
+    fetchData();
+  }, [admintoken]);
 
   return (
-    <div style={{ height: '100vh' }} className="mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-center">Branchwise Student Distribution</h1>
+    <div style={{height : '85vh', overflowY : 'scroll'}} className="p-3 downscroll">
+      <h1 className="text-3xl font-bold mb-6">Welcome to the Student Analytics Dashboard</h1>
 
-      {/* <div style={{ background: "#1A2438", color: 'white' }} className="from-blue-500 to-green-500 p-6 rounded-lg mt-4">
-        <h2 className="text-xl font-bold mb-4 text-white">Student Count by Branch</h2>
-        <ul className="space-y-2">
-          {branchData.map(branch => (
-            <li key={branch.branch} className="bg-white p-3 rounded-lg flex justify-between items-center">
-              <span className="font-bold text-gray-700">{branch.branch}</span>
-              <span className="text-gray-700">{branch.count} students</span>
-            </li>
-          ))}
-        </ul>
-      </div> */}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white p-6 rounded-lg  flex flex-col items-center">
-          <h2 className="text-xl font-bold mb-4">Number of Students</h2>
-          <Pie data={getChartData()} />
-        </div>
-
-        <div className="bg-white p-6 rounded-lg  flex flex-col items-center">
-          <h2 className="text-xl font-bold mb-4">Student Distribution</h2>
-          <div style={{ width: '100%', height: '400px' }}>
-            <Bar data={getChartData()} options={{ maintainAspectRatio: false }} />
-          </div>
-        </div>
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">Yearly Student Enrollment</h2>
+        {lineData ? (
+          <Line data={lineData} options={{ responsive: true }} />
+        ) : (
+          <p>Loading line chart...</p>
+        )}
       </div>
+
+      <div className="mb-3">
+        <h2 className="text-2xl font-semibold mb-4">Gender Distribution (Last 5 Years)</h2>
+        {barData ? (
+          <Bar data={barData} options={{ responsive: true }} />
+        ) : (
+          <p>Loading bar chart...</p>
+        )}
+      </div>
+
     </div>
   );
 };
