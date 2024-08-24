@@ -306,7 +306,7 @@ const generateApplicationNumber = async () => {
   }
 };
 
-const generateRegistrationNumber = async (branchCode, joiningYear) => {
+const generateRegistrationNumber = async (branchCode, joiningYear, entrancetype) => {
   try {
     // Fetch the branch name based on the branch code
     const [branchResults] = await connection.query(
@@ -328,8 +328,11 @@ const generateRegistrationNumber = async (branchCode, joiningYear) => {
 
     const count = countResults[0].count + 1;
     const paddedCount = count.toString().padStart(3, '0');
-    const registrationNumber = `${branchName}-${joiningYear}-${paddedCount}`;
-
+    let registrationNumber = `${branchName}-${joiningYear}-${paddedCount}`;
+    if (entrancetype === 'ecet') {
+      registrationNumber = `L${registrationNumber}`;
+    }
+  
     return registrationNumber;
   } catch (err) {
     console.error('Error generating registration number:', err);
@@ -366,8 +369,8 @@ Router.post('/admitstudent', adminAuth, async (req, res) => {
       fatheraadhar,
       motheraadhar,
       scholarshipholder,
-      presentaddress,
-      presentpincode,
+      permanentaddress,
+      permanentpincode,
       currentaddress,
       currentpincode,
       moa,
@@ -387,21 +390,21 @@ Router.post('/admitstudent', adminAuth, async (req, res) => {
     const hashedpassword = await bcrypt.hash(password, 10);
     console.log("hashedpassword", hashedpassword);
 
-    const registrationnumber = await generateRegistrationNumber(branch, joiningyear);
+    const registrationnumber = await generateRegistrationNumber(branch, joiningyear, entrancetype);
     const query = `
       INSERT INTO studentinfo (
         applicationnumber, admissionnumber, registrationid, joiningdate, nameasperssc,
         studentaadhar, mobile, alternatemobile, personalemail, gender, dob, branch, joiningyear, quota,
-        admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, presentaddress,
-        presentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,
+        admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, permanentaddress,
+        permanentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,
         city, state, nationality, religion, caste, castecategory, studentstatus, studentpassword, semesternumber
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const status = 0;
     const values = [
       applicationNumber, registrationnumber, registrationnumber, joiningdate, nameasperssc,
       studentaadhar, mobile, alternatemobile, personalemail, gender, dob, branch, joiningyear, quota,
-      admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, presentaddress,
-      presentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,
+      admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, permanentaddress,
+      permanentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,
       city, state, nationality, religion, caste, castecategory,status,hashedpassword, semesternumber
     ];
 
@@ -409,6 +412,203 @@ Router.post('/admitstudent', adminAuth, async (req, res) => {
     res.status(200).json({ message: 'Student added successfully', applicationnumber: applicationNumber });
   } catch (err) {
     res.status(500).json({ error: 'Failed to add student', details: err.message });
+  }
+});
+
+
+
+Router.get('/student/:registrationid', adminAuth, async (req, res) => {
+  const { registrationid } = req.params;
+
+  const query = `
+    SELECT *
+    FROM studentinfo 
+    WHERE registrationid = ?`;
+
+  try {
+    const [student] = await connection.execute(query, [registrationid]);
+
+    if (student.length === 0) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    res.json(student[0]);
+  } catch (error) {
+    console.error('An error occurred while fetching the student:', error);
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
+
+Router.put('/student/:registrationid', adminAuth, async (req, res) => {
+  const { registrationid } = req.params;
+  const {
+    joiningdate,
+    nameasperssc,
+    studentaadhar,
+    mobile,
+    alternatemobile,
+    personalemail,
+    gender,
+    dob,
+    branch,
+    joiningyear,
+    quota,
+    admissiontype,
+    fathername,
+    mothername,
+    fatheraadhar,
+    motheraadhar,
+    scholarshipholder,
+    permanentaddress,
+    permanentpincode,
+    currentaddress,
+    currentpincode,
+    moa,
+    remarks,
+    entrancetype,
+    entrancehallticket,
+    rank,
+    city,
+    state,
+    nationality,
+    religion,
+    caste,
+    castecategory,
+    studentstatus
+  } = req.body;
+
+  const semesternumber = semestercheck(entrancetype);
+  
+  const query = `
+    UPDATE studentinfo
+    SET 
+      joiningdate = ?,
+      nameasperssc = ?,
+      studentaadhar = ?,
+      mobile = ?,
+      alternatemobile = ?,
+      personalemail = ?,
+      gender = ?,
+      dob = ?,
+      branch = ?,
+      joiningyear = ?,
+      quota = ?,
+      admissiontype = ?,
+      fathername = ?,
+      mothername = ?,
+      fatheraadhar = ?,
+      motheraadhar = ?,
+      scholarshipholder = ?,
+      permanentaddress = ?,
+      permanentpincode = ?,
+      currentaddress = ?,
+      currentpincode = ?,
+      moa = ?,
+      remarks = ?,
+      entrancetype = ?,
+      entrancehallticket = ?,
+      rank = ?,
+      city = ?,
+      state = ?,
+      nationality = ?,
+      religion = ?,
+      caste = ?,
+      castecategory = ?,
+      studentstatus = ?,
+      semesternumber = ?
+    WHERE registrationid = ?`;
+
+  const values = [
+    joiningdate,
+    nameasperssc,
+    studentaadhar,
+    mobile,
+    alternatemobile,
+    personalemail,
+    gender,
+    dob,
+    branch,
+    joiningyear,
+    quota,
+    admissiontype,
+    fathername,
+    mothername,
+    fatheraadhar,
+    motheraadhar,
+    scholarshipholder,
+    permanentaddress,
+    permanentpincode,
+    currentaddress,
+    currentpincode,
+    moa,
+    remarks,
+    entrancetype,
+    entrancehallticket,
+    rank,
+    city,
+    state,
+    nationality,
+    religion,
+    caste,
+    castecategory,
+    studentstatus,
+    semesternumber,
+    registrationid // This should be the last parameter
+  ];
+
+  try {
+    const [result] = await connection.execute(query, values);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+    res.status(200).json({ message: 'Student updated successfully' });
+  } catch (error) {
+    console.error('An error occurred while updating the student:', error);
+    res.status(500).json({ error: 'An error occurred', details: error.message });
+  }
+});
+
+//studentbulk update 
+Router.put('/students/bulkupdate', adminAuth, async (req, res) => {
+  try {
+    const file = req.files.excelFile; // Assuming you're using a package like express-fileupload
+    const workbook = xlsx.read(file.data, { type: 'buffer' });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = xlsx.utils.sheet_to_json(worksheet);
+
+    for (const row of rows) {
+      const registrationid = row.registrationid; // Assuming the first column is always the primary key
+      delete row.registrationid; // Remove primary key from the fields to update
+
+      if (!registrationid) {
+        continue; // Skip if registrationid is missing
+      }
+
+      const fieldsToUpdate = Object.keys(row);
+      const valuesToUpdate = Object.values(row);
+
+      // Dynamically construct the query
+      const setClause = fieldsToUpdate.map(field => `${field} = ?`).join(', ');
+
+      const query = `
+        UPDATE studentinfo
+        SET ${setClause}
+        WHERE registrationid = ?`;
+
+      const values = [...valuesToUpdate, registrationid];
+
+      // Execute the query
+      const [result] = await connection.execute(query, values);
+
+      if (result.affectedRows === 0) {
+        console.warn(`No student found with registrationid ${registrationid}`);
+      }
+    }
+
+    res.status(200).json({ message: 'Bulk update successful' });
+  } catch (error) {
+    console.error('An error occurred during the bulk update:', error);
+    res.status(500).json({ error: 'An error occurred', details: error.message });
   }
 });
 
@@ -455,6 +655,49 @@ Router.post('/admitstudents', adminAuth, upload.single('file'), async (req, res)
     res.status(500).json({ error: 'Failed to add students', details: err.message });
   }
 });
+
+Router.get('/admissionstudents/:joiningyear/:branchcode?', adminAuth, async (req, res) => {
+  const { joiningyear, branchcode } = req.params;
+
+  let query = `
+    SELECT 
+      applicationnumber, 
+      registrationid, 
+      nameasperssc, 
+      imgurl, 
+      gender 
+    FROM studentinfo 
+    WHERE joiningyear = ?`;
+
+  let queryParams = [joiningyear];
+
+  if (branchcode) {
+    query += ' AND branch = ?';
+    queryParams.push(branchcode);
+  }
+
+  const maleCountQuery = `
+    SELECT COUNT(*) as maleCount 
+    FROM studentinfo 
+    WHERE joiningyear = ? AND gender = 'male' ${branchcode ? 'AND branch = ?' : ''}`;
+
+  const femaleCountQuery = `
+    SELECT COUNT(*) as femaleCount 
+    FROM studentinfo 
+    WHERE joiningyear = ? AND gender = 'female' ${branchcode ? 'AND branch = ?' : ''}`;
+
+  try {
+    const [students] = await connection.execute(query, queryParams);
+    const [[{ maleCount }]] = await connection.execute(maleCountQuery, queryParams);
+    const [[{ femaleCount }]] = await connection.execute(femaleCountQuery, queryParams);
+
+    res.json({ students, maleCount, femaleCount });
+  } catch (error) {
+    console.error('An error occurred while fetching students:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
 
 
 //Courses

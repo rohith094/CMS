@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 const AdmitStudentForm = () => {
 
   const [branches, setBranches] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const year = new Date().getFullYear();
   const navigate = useNavigate();
 
@@ -85,8 +86,8 @@ const AdmitStudentForm = () => {
     fatheraadhar: '',
     motheraadhar: '',
     scholarshipholder: '',
-    presentaddress: '',
-    presentpincode: '',
+    permanentaddress: '',
+    permanentpincode: '',
     currentaddress: '',
     currentpincode: '',
     moa: '',
@@ -111,6 +112,7 @@ const AdmitStudentForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const admintoken = Cookies.get('admintoken');
       const response = await axios.post('http://localhost:3001/admin/admitstudent', formData, {
@@ -125,6 +127,8 @@ const AdmitStudentForm = () => {
     } catch (error) {
       console.error('Error admitting student:', error.response?.data || error.message);
       toast.error("an error occured")
+    } finally{
+      setIsLoading(false);
     }
   };
 
@@ -222,12 +226,10 @@ const AdmitStudentForm = () => {
             onChange={handleChange}
             className="p-3 border rounded w-full"
           >
-            <option value="">Select year</option>
-            <option value={year - 2}>{year - 2}</option>
-            <option value={year - 1}>{year - 1}</option>
+            <option value="">Select Admission Year</option>
             <option value={year}>{year}</option>
-            <option value={year + 1}>{year + 1}</option>
-            <option value={year + 2}>{year + 2}</option>
+            <option value={year - 1}>{year - 1}</option>
+            <option value={year - 2}>{year - 2}</option>
           </select>
           <select
             name="quota"
@@ -297,17 +299,17 @@ const AdmitStudentForm = () => {
             <option value="No">No</option>
           </select>
           <textarea
-            name="presentaddress"
-            placeholder="Present Address"
-            value={formData.presentaddress}
+            name="permanentaddress"
+            placeholder="Permanent Address"
+            value={formData.permanentaddress}
             onChange={handleChange}
             className="p-3 border rounded w-full"
           />
           <input
             type="text"
-            name="presentpincode"
-            placeholder="Present Pincode"
-            value={formData.presentpincode}
+            name="permanentpincode"
+            placeholder="Permanent Pincode"
+            value={formData.permanentpincode}
             onChange={handleChange}
             className="p-3 border rounded w-full"
           />
@@ -443,12 +445,54 @@ const AdmitStudentForm = () => {
         </div>
 
         <div className="flex justify-center">
-          <button
-            type="submit"
-            className="bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600"
-          >
-            Admit Student
-          </button>
+        <button
+                    type="submit"
+                    className={`inline-flex w-full items-center justify-center rounded-full bg-black px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80 ${
+                      isLoading ? "cursor-not-allowed" : ""
+                    }`}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <defs>
+                          <linearGradient
+                            id="gradient"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="100%"
+                          >
+                            <stop
+                              offset="0%"
+                              style={{ stopColor: "#FFFFFF", stopOpacity: 1 }}
+                            />
+                            <stop
+                              offset="100%"
+                              style={{ stopColor: "#40ADFE", stopOpacity: 1 }}
+                            />
+                          </linearGradient>
+                        </defs>
+                        <circle
+                          className="opacity-100"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="url(#gradient)"
+                          strokeWidth="4"
+                        ></circle>
+                      </svg>
+                    ) : (
+                      <>
+                        Admit Student
+                        
+                      </>
+                    )}
+                  </button>
         </div>
       </form>
     </div>

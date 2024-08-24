@@ -31,7 +31,7 @@ const AdminLogin = () => {
       const response = await axios.post('http://localhost:3001/admin/login', { mobile, password });
       console.log(response);
       if (response.data.token) {
-        Cookies.set('admintoken', response.data.token, { expires: 1 / 24 });
+        Cookies.set('admintoken', response.data.token, { expires: 2 / 24 });
         toast.success('Login Successful');
         navigate('/admin/admindashboard');
       } else {

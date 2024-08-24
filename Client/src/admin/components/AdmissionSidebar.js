@@ -29,8 +29,11 @@ const AdmissionSidebar = () => (
   <NavLink to='addstudents'>
     <IconButton icon={MdGroupAdd} tooltip="Upload Students" />
   </NavLink>
-  <NavLink to='viewstudents'>
-    <IconButton icon={ImProfile} tooltip="View Students" />
+  <NavLink to='viewadmissions'>
+    <IconButton icon={ImProfile} tooltip="View Admissions" />
+  </NavLink>
+  <NavLink to='bulkupdate'>
+    <IconButton icon={ImProfile} tooltip="update bulk data" />
   </NavLink>
   <NavLink to='downloadstudents'>
     <IconButton icon={FaDownload} tooltip="Download Data" />

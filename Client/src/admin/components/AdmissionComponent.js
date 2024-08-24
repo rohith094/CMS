@@ -13,6 +13,8 @@ import StudentSearch from "../pages/StudentSearch";
 import StudentDownload from "../pages/StudentDownload";
 import AdmitStudentForm from "../pages/AdmitStudentForm";
 import AdmissionSidebar from "./AdmissionSidebar";
+import ViewAdmissions from "./ViewAdmissions";
+import BulkUpdateComponent from "../pages/BulkUpdateComponent";
 function AdmissionComponent() {
   
 
@@ -26,12 +28,15 @@ function AdmissionComponent() {
         <Routes>
           <Route path="" element={<Welcomepage />} />
           <Route index path='addstudent' element={<AdmitStudentForm />} />
-          <Route path="addstudents" element={<Addstudents />} />      
-          <Route path="viewstudents" element={<StudentSearch />} />
+          <Route path="viewadmissions" element={<ViewAdmissions />} />    
+          <Route path="viewstudent/:registrationid" element={<Singlestudent />} />  
+          <Route path="updatestudent/:registrationid" element={<UpdateStudent />} />
+          <Route path="bulkupdate" element={<BulkUpdateComponent />} />
+          {/* <Route path="viewstudents" element={<StudentSearch />} />
           <Route path="viewstudents/:jntuno" element={<Singlestudent />} />
           <Route path="updatestudent/:jntuno" element={<UpdateStudent />} />
           <Route path="deletestudent/:jntuno" element={<Deletestudent />} />
-          <Route path="downloadstudents" element={<StudentDownload />} />
+          <Route path="downloadstudents" element={<StudentDownload />} /> */}
           
         </Routes>
         
