@@ -24,7 +24,9 @@ const Semesters = () => {
           Authorization: `${token}`,
         },
       });
+
       setSemesters(response.data);
+
     } catch (error) {
       console.error('Error fetching semesters:', error);
     } finally {

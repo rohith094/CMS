@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import {toast} from 'react-toastify';
-import {useNavigate} from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const BulkUpdateComponent = () => {
   const [selectedFields, setSelectedFields] = useState([]);
@@ -13,18 +13,18 @@ const BulkUpdateComponent = () => {
   const navigate = useNavigate();
 
   const studentFields = [
-    'registrationid','joiningdate', 'nameasperssc', 'studentaadhar', 'mobile', 'alternatemobile',
+    'registrationid', 'joiningdate', 'nameasperssc', 'studentaadhar', 'mobile', 'alternatemobile',
     'personalemail', 'gender', 'dob', 'branch', 'joiningyear', 'quota',
     'admissiontype', 'fathername', 'mothername', 'fatheraadhar', 'motheraadhar',
     'scholarshipholder', 'permanentaddress', 'permanentpincode', 'currentaddress',
     'currentpincode', 'moa', 'remarks', 'entrancetype', 'entrancehallticket', 'rank',
-    'city', 'state', 'nationality', 'religion', 'caste', 'castecategory'
+    'city', 'state', 'nationality', 'religion', 'caste', 'castecategory', 'imgurl'
   ];
 
   const handleFieldSelection = (field) => {
-    setSelectedFields(prev => 
-      prev.includes(field) 
-        ? prev.filter(f => f !== field) 
+    setSelectedFields(prev =>
+      prev.includes(field)
+        ? prev.filter(f => f !== field)
         : [...prev, field]
     );
   };
@@ -52,7 +52,7 @@ const BulkUpdateComponent = () => {
         raw: false, // Let the library handle dates automatically
         dateNF: 'yyyy-mm-dd' // Specify the desired date format
       });
-  
+
       // Explicitly format date fields if necessary
       const formattedData = data.map(row => {
         if (row.joiningdate) {
@@ -79,7 +79,7 @@ const BulkUpdateComponent = () => {
       const year = parsedDate.getFullYear();
       return `${year}-${month}-${day}`;
     }
-  
+
     // If not, try to parse assuming the input is in 'dd-mm-yyyy' format
     const parts = dateString.split('-');
     if (parts.length === 3) {
@@ -94,23 +94,23 @@ const BulkUpdateComponent = () => {
         return `${formattedYear}-${formattedMonth}-${formattedDay}`;
       }
     }
-  
+
     // If the date is still invalid, return the original string or a fallback
     console.warn('Invalid date value:', dateString);
     return dateString; // or return '' to skip invalid dates
-};
+  };
 
-  
+
 
   const handleBulkUpdate = async () => {
     try {
       const token = Cookies.get('admintoken'); // Get the token from cookies
-  
+
       if (!token) {
         alert('Authorization token is missing!');
         return;
       }
-  
+
       const selectedData = excelData.map(row => {
         const newRow = {};
         selectedFields.forEach(field => {
@@ -118,7 +118,7 @@ const BulkUpdateComponent = () => {
         });
         return newRow;
       });
-  
+
       const worksheet = XLSX.utils.json_to_sheet(selectedData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
@@ -126,26 +126,26 @@ const BulkUpdateComponent = () => {
         [XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })],
         { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
       );
-  
+
       const formData = new FormData();
       formData.append('excelFile', excelBlob, fileName);
-  
+
       console.log("Sending data:", selectedData); // Debug: Log the data being sent
       console.log("FormData:", formData); // Debug: Log the FormData object
-  
+
       const response = await axios.put('http://localhost:3001/admin/students/bulkupdate', formData, {
-        headers: { 
+        headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `${token}` // Add the authorization header
         }
       });
-  
+
       console.log("Server Response:", response); // Debug: Log the response from the server
-  
+
       if (response.status === 200) {
-        
-         toast.success('Bulk update successful!');
-         navigate('/admin/admissions/viewadmissions');
+
+        toast.success('Bulk update successful!');
+        navigate('/admin/admissions/viewadmissions');
 
       } else {
         toast.error(`Bulk update failed `);
@@ -155,10 +155,10 @@ const BulkUpdateComponent = () => {
       toast.error('Bulk update failed!');
     }
   };
-  
+
 
   return (
-    <div style={{height : "85vh", overflowY : 'scroll'}} className=" downscroll p-6  min-h-screen flex flex-col items-center">
+    <div style={{ height: "85vh", overflowY: 'scroll' }} className=" downscroll p-6  min-h-screen flex flex-col items-center">
       <h2 className="text-2xl font-bold mb-2">Bulk Update Students</h2>
 
       <div className="bg-white p-6 rounded-lg  w-full max-w-4xl">
@@ -187,16 +187,23 @@ const BulkUpdateComponent = () => {
             </label>
           ))}
         </div>
-
-        <input
-          type="file"
-          accept=".xlsx, .xls"
-          onChange={handleFileUpload}
-          className="mb-4"
-        />
-
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <input
+            type="file"
+            accept=".xlsx, .xls"
+            onChange={handleFileUpload}
+            className="mb-4"
+          />
+          <button
+            style={{ background: "#1A2438" }}
+            onClick={handleBulkUpdate}
+            className="mb-3 py-2 px-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300"
+          >
+            Update Students
+          </button>
+        </div>
         {fileName && (
-          <div style={{overflowX : 'scroll'}} className="bg-gray-50 p-4 rounded-lg shadow-inner mb-6 downscroll">
+          <div style={{ overflowX: 'scroll' }} className="bg-gray-50 p-4 rounded-lg shadow-inner mb-6 downscroll">
             <h4 className="text-lg font-medium mb-2">Preview: {fileName}</h4>
             <table className="min-w-full bg-white">
               <thead>
@@ -218,14 +225,6 @@ const BulkUpdateComponent = () => {
             </table>
           </div>
         )}
-
-        <button
-          style={{background : "#415A77"}}
-          onClick={handleBulkUpdate}
-          className="w-full py-2 px-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300"
-        >
-          Update Students
-        </button>
       </div>
     </div>
   );

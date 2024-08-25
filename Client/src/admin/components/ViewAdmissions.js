@@ -146,13 +146,15 @@ const ViewAdmissions = () => {
             {students.length === 0 ? (
               <div style={{ textAlign: 'center' }} className="mt-4 text-lg">No students found for this selection.</div>
             ) : (
+              <>
+              <div style={{width : '100vw', height : '1px', borderRadius : '2px'}}></div>
               <table style={{width : '100vw', overflowX : 'scroll'}} className="bg-white border border-gray-300">
                 <thead className='sticky top-0 bg-black text-white'>
                   <tr>
-                    <th className="py-3 px-2 border-b text-left">Image</th>
-                    <th className="py-3 px-2 border-b text-left">Reg ID</th>
-                    <th className=" py-3 px-2 border-b text-left">Application No.</th>
-                    <th className="py-3 px-2 border-b text-left">Name</th>
+                    <th className="py-3 px-2 border-b text-left">Profile</th>
+                    <th className="py-3 px-2 border-b text-left">RegistrationID</th>
+                    <th className=" py-3 px-2 border-b text-left">Application Number</th>
+                    <th className="py-3 px-2 border-b text-left">NameasperSSC</th>
                     <th className=" py-3 px-2 border-b text-left">Gender</th>
                     <th className=" py-3 px-2 border-b text-left">Status</th>
                     <th className=" py-3 px-2 border-b text-center">Actions</th>
@@ -161,7 +163,12 @@ const ViewAdmissions = () => {
                 <tbody>
                   {students.map((student, index) => (
                     <tr key={student.registrationid}>
-                      <td className="py-3 px-2 border-b">student.imageurl</td>
+                      <td className="py-4 px-3 border-b">
+                        <img style={{width : '70px', height : '70px', borderRadius : '100%'}} 
+                        src={student.imgurl} alt='studentimage'
+                        >
+                        </img>
+                      </td>
                       <td className="py-3 px-2 border-b">{student.registrationid}</td>
                       <td className="py-3 px-2 border-b">{student.applicationnumber}</td>
                       <td className="py-3 px-2 border-b">{student.nameasperssc}</td>
@@ -185,6 +192,7 @@ const ViewAdmissions = () => {
                   ))}
                 </tbody>
               </table>
+              </>
             )}
           </>
         )}

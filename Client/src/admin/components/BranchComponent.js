@@ -3,6 +3,7 @@ import { Routes, Route,Outlet } from 'react-router-dom';
 import AddBranch from './branches/AddBranch';
 import EditBranch from './branches/EditBranch';
 import Branches from './Branches'
+import CoursesList from './courses/CoursesList';
 const BranchComponent = () => {
   return (
     <div >
@@ -12,6 +13,7 @@ const BranchComponent = () => {
           <Route path="" element={<Branches/>} />
           <Route path="addbranch" element={<AddBranch/>}/>
           <Route path="editbranch/:branchID" element={<EditBranch/>} />
+          
         </Routes>
         
         <Outlet />
@@ -20,4 +22,6 @@ const BranchComponent = () => {
   )
 }
 
-export default BranchComponent
+export default BranchComponent;
+
+

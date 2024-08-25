@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 import Cookies from 'js-cookie';
+import {toast} from 'react-toastify';
 
 const studentFields = [
   'registrationid', 'joiningdate', 'nameasperssc', 'studentaadhar', 'mobile', 'alternatemobile',
@@ -9,7 +10,7 @@ const studentFields = [
   'admissiontype', 'fathername', 'mothername', 'fatheraadhar', 'motheraadhar',
   'scholarshipholder', 'permanentaddress', 'permanentpincode', 'currentaddress',
   'currentpincode', 'moa', 'remarks', 'entrancetype', 'entrancehallticket', 'rank',
-  'city', 'state', 'nationality', 'religion', 'caste', 'castecategory'
+  'city', 'state', 'nationality', 'religion', 'caste', 'castecategory', 'imgurl'
 ];
 
 const DownloadFilteredData = () => {
@@ -49,7 +50,7 @@ const DownloadFilteredData = () => {
 
   const handleDownload = async () => {
     if (selectedFields.length === 0) {
-      alert("Please select at least one field to download.");
+    toast.error("Please select at least one field to download.");
       return;
     }
 
@@ -115,8 +116,9 @@ const DownloadFilteredData = () => {
       <div style={{display : 'flex', justifyContent: 'space-between', alignItems : 'center'}}>
         <h3 className="text-lg font-semibold mb-4 mt-4">Select Fields to Download:</h3>
         <button
+        style={{background : '#1A2438'}}
         onClick={handleDownload}
-        className="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="text-white p-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2  focus:ring-offset-2"
       >
         Download Excel
       </button>

@@ -125,17 +125,7 @@ const Sidebar = () => {
                 onClick={closeSidebar}
               >
                 <CgProfile className="h-[20px] w-[20px]" />
-                <span className="ms-3">Secitons</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/admin/courses"
-                className={({ isActive }) => isActive ? "flex items-center p-2 text-gray-900 rounded-2xl bg-cyan-200" : "flex items-center p-2 text-gray-900 rounded-2xl hover:bg-cyan-100 group active"}
-                onClick={closeSidebar}
-              >
-                <CgProfile className="h-[20px] w-[20px]" />
-                <span className="ms-3">Courses</span>
+                <span className="ms-3">Sections</span>
               </NavLink>
             </li>
             <li>

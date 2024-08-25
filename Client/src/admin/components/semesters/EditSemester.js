@@ -26,12 +26,19 @@ const EditSemester = () => {
     setLoading(true);
     try {
       const token = Cookies.get('admintoken');
-      const response = await axios.get('http://localhost:3001/admin/viewsemesters', {
+      const response = await axios.get(`http://localhost:3001/admin/semester/${semesterID}`, {
         headers: {
           Authorization: `${token}`,
         },
       });
-      const semester = response.data.find((sem) => sem.semesterid === parseInt(semesterID));
+
+      const semester = response.data;
+
+        if (semester.startdate && semester.enddate) {
+          semester.startdate = new Date(semester.startdate).toISOString().split('T')[0];
+          semester.enddate = new Date(semester.enddate).toISOString().split('T')[0];
+        }
+      console.log(semester);
       if (semester) {
         setSemesterNumber(semester.semesternumber);
         setSemesterName(semester.semestername);

@@ -190,7 +190,6 @@ function AdminDashboard() {
           <Route path="branches/*" element={<BranchComponent />} />
           <Route path="branch/:branchcode/*" element={<BranchViewComponent />} />
           <Route path="sections/*" element={<SectionComponent />} />
-          <Route path="courses/*" element={<CourseComponent />} />
         </Routes>
         <Outlet />
       </div>
