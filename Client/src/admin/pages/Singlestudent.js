@@ -48,19 +48,47 @@ const Singlestudent = () => {
     navigate('/admin/admissions/viewadmissions');
   };
 
+  const toggleStudentStatus = async () => {
+    const newStatus = student.studentstatus === 1 ? 0 : 1;
+
+    try {
+      const response = await axios.put(`http://localhost:3001/admin/studentstatus/${registrationid}`, {
+        studentstatus: newStatus
+      }, {
+        headers: {
+          'Authorization': `${admintoken}`
+        }
+      });
+
+      if (response.data.message === 'Student status updated successfully') {
+        setStudent({ ...student, studentstatus: newStatus });
+        toast.info(`Student is now ${newStatus === 1 ? 'Active' : 'Inactive'}`);
+      }
+    } catch (error) {
+      toast.error('Failed to update student status');
+    }
+  };
+
   return (
     <div style={{ height: '85vh', overflowY: 'scroll' }} className="downscroll relative  flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 w-full max-w-[48rem] flex-row mx-auto my-8">
       <div
-        style={{ width: "100%", display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}
+        style={{ width: "100%", display: 'flex', justifyContent: 'space-around', alignItems: 'center'}}
         className=" overflow-hidden text-gray-700 bg-white rounded-r-none bg-clip-border rounded-xl shrink-0"
       >
-        <img
-          style={{ width: '250px', borderRadius: '8px', }}
-          src={student.imgurl || "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=1471&amp;q=80"}
-          alt={`${student.nameasperssc || 'Student'}`}
-          className="object-cover"
-        />
-
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+          <img
+            style={{ width: '250px', borderRadius: '8px', }}
+            src={student.imgurl || "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=1471&amp;q=80"}
+            alt={`${student.nameasperssc || 'Student'}`}
+            className="object-cover"
+          />
+          <button
+            onClick={toggleStudentStatus}
+            className={`mt-4 py-2 px-4 rounded-lg text-white ${student.studentstatus === 1 ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+          >
+            {student.studentstatus === 1 ? 'Inactive' : 'Active'}
+          </button>
+        </div>
         <div>
           <table className="min-w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
             <tbody>
@@ -106,17 +134,17 @@ const Singlestudent = () => {
           >
             Back
           </button>
+
         </div>
       </div>
       <div className="p-6">
         <table className="min-w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
           <tbody>
             {Object.entries(student)
-              .filter(([key]) => key !== 'studentpassword' && key !== 'stdid' && key !== 'applicationnumber') // Filter out the studentpassword key
+              .filter(([key]) => key !== 'studentpassword' && key !== 'stdid' && key !== 'applicationnumber')
               .map(([key, value]) => {
-                // Check if the key is 'joiningdate' and format the value if it is
                 if (key === 'joiningdate') {
-                  value = new Date(value).toLocaleDateString(); // Format the timestamp to only show the date
+                  value = new Date(value).toLocaleDateString();
                 }
 
                 return (
@@ -137,3 +165,4 @@ const Singlestudent = () => {
 };
 
 export default Singlestudent;
+

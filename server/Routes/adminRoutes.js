@@ -666,8 +666,10 @@ Router.post('/admitstudents', adminAuth, upload.single('file'), async (req, res)
   }
 });
 
+
 Router.get('/admissionstudents/:joiningyear/:branchcode?', adminAuth, async (req, res) => {
   const { joiningyear, branchcode } = req.params;
+  const studentstatus = req.query.studentstatus || '1'; // Default to active students
 
   let query = `
     SELECT 
@@ -675,11 +677,12 @@ Router.get('/admissionstudents/:joiningyear/:branchcode?', adminAuth, async (req
       registrationid, 
       nameasperssc, 
       imgurl, 
-      gender 
+      gender,
+      studentstatus
     FROM studentinfo 
-    WHERE joiningyear = ?`;
+    WHERE joiningyear = ? AND studentstatus = ?`;
 
-  let queryParams = [joiningyear];
+  let queryParams = [joiningyear, studentstatus];
 
   if (branchcode) {
     query += ' AND branch = ?';
@@ -689,12 +692,12 @@ Router.get('/admissionstudents/:joiningyear/:branchcode?', adminAuth, async (req
   const maleCountQuery = `
     SELECT COUNT(*) as maleCount 
     FROM studentinfo 
-    WHERE joiningyear = ? AND gender = 'male' ${branchcode ? 'AND branch = ?' : ''}`;
+    WHERE joiningyear = ? AND gender = 'male' AND studentstatus = ? ${branchcode ? 'AND branch = ?' : ''}`;
 
   const femaleCountQuery = `
     SELECT COUNT(*) as femaleCount 
     FROM studentinfo 
-    WHERE joiningyear = ? AND gender = 'female' ${branchcode ? 'AND branch = ?' : ''}`;
+    WHERE joiningyear = ? AND gender = 'female' AND studentstatus = ? ${branchcode ? 'AND branch = ?' : ''}`;
 
   try {
     const [students] = await connection.execute(query, queryParams);
@@ -708,7 +711,65 @@ Router.get('/admissionstudents/:joiningyear/:branchcode?', adminAuth, async (req
   }
 });
 
-//analytics route 
+//manage student active and inactive 
+Router.put('/studentstatus/:registrationid', async (req, res) => {
+  const { registrationid } = req.params;
+  const { studentstatus } = req.body;
+
+  try {
+      const result = await connection.query(
+          'UPDATE studentinfo SET studentstatus = ? WHERE registrationid = ?',
+          [studentstatus, registrationid]
+      );
+      
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ message: 'Student not found' });
+      }
+
+      res.json({ message: 'Student status updated successfully' });
+  } catch (error) {
+      console.error('Error updating student status:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+Router.post('/downloadstudents/:year/:branch?', adminAuth, async (req, res) => {
+  const { year, branch } = req.params;
+  const { fields, studentstatus } = req.body;
+
+  try {
+    let query = `
+      SELECT ${fields.join(', ')}
+      FROM studentinfo
+      WHERE joiningyear = ? AND studentstatus = ?
+    `;
+    
+    const queryParams = [year, studentstatus];
+    
+    if (branch) {
+      query += ` AND branch = ?`;
+      queryParams.push(branch);
+    }
+
+    const [students] = await connection.query(query, queryParams);
+
+    // Convert the data to Excel format
+    const worksheet = xlsx.utils.json_to_sheet(students);
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, worksheet, 'Students');
+
+    // Convert the workbook to a buffer
+    const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+
+    res.setHeader('Content-Disposition', `attachment; filename=Filtered_Students_${year}.xlsx`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+
+  } catch (error) {
+    console.error('Error fetching students for download:', error);
+    res.status(500).json({ error: 'An error occurred while processing your request.' });
+  }
+});
 
 Router.get('/student-analytics',adminAuth, async (req, res) => {
   try {
@@ -752,6 +813,7 @@ Router.get('/student-analytics',adminAuth, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch student analytics' });
   }
 });
+
 
 
 //Courses

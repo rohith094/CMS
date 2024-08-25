@@ -10,6 +10,7 @@ const ViewAdmissions = () => {
   const year = new Date().getFullYear();
   const [currentYear, setCurrentYear] = useState(year.toString());
   const [currentBranch, setCurrentBranch] = useState('');
+  const [currentStatus, setCurrentStatus] = useState('1'); // Default to active students
   const [branches, setBranches] = useState([]);
   const [students, setStudents] = useState([]);
   const [maleCount, setMaleCount] = useState(0);
@@ -29,7 +30,7 @@ const ViewAdmissions = () => {
   };
 
   const handleBack = () => {
-    navigate('/admin/studentsdata');
+    navigate('/admin/admissions');
   };
 
   const fetchBranches = async () => {
@@ -45,12 +46,12 @@ const ViewAdmissions = () => {
     }
   };
 
-  const fetchStudents = async (yearToFetch, branchToFetch = '') => {
+  const fetchStudents = async (yearToFetch, branchToFetch = '', statusToFetch = '1') => {
     setLoading(true);
     try {
       const url = branchToFetch
-        ? `http://localhost:3001/admin/admissionstudents/${yearToFetch}/${branchToFetch}`
-        : `http://localhost:3001/admin/admissionstudents/${yearToFetch}`;
+        ? `http://localhost:3001/admin/admissionstudents/${yearToFetch}/${branchToFetch}?studentstatus=${statusToFetch}`
+        : `http://localhost:3001/admin/admissionstudents/${yearToFetch}?studentstatus=${statusToFetch}`;
 
       const response = await axios.get(url, {
         headers: {
@@ -58,6 +59,7 @@ const ViewAdmissions = () => {
         },
       });
       setStudents(response.data.students);
+      console.log(response.data.students);
       setMaleCount(response.data.maleCount);
       setFemaleCount(response.data.femaleCount);
     } catch (error) {
@@ -71,21 +73,21 @@ const ViewAdmissions = () => {
   }, []);
 
   useEffect(() => {
-    fetchStudents(currentYear, currentBranch);
-  }, [currentYear, currentBranch]);
+    fetchStudents(currentYear, currentBranch, currentStatus);
+  }, [currentYear, currentBranch, currentStatus]);
 
   return (
     <div style={{ width: '97%', height: '94vh', borderRadius: '6px' }} className="sticky top-0">
-      <div style={{ display: 'flex', justifyContent: 'space-around' , paddingTop : '10px'}}>
-      <div style={{ marginBottom: '10px', borderRadius: '8px', padding : '15px' , boxShadow : 'rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-around', paddingTop: '10px' }}>
+        <div style={{ marginBottom: '10px', borderRadius: '8px', padding: '15px', boxShadow: 'rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px' }}>
           <strong>Total Count:</strong> {maleCount + femaleCount}
-      </div>
-      <div style={{ marginBottom: '10px',borderRadius: '8px', padding : '15px' , boxShadow : 'rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px' }}>
+        </div>
+        <div style={{ marginBottom: '10px', borderRadius: '8px', padding: '15px', boxShadow: 'rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px' }}>
           <strong>Male Count:</strong> {maleCount}
-      </div>
-      <div style={{ marginBottom: '10px',borderRadius: '8px', padding : '15px' , boxShadow : 'rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px' }}>
+        </div>
+        <div style={{ marginBottom: '10px', borderRadius: '8px', padding: '15px', boxShadow: 'rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px' }}>
           <strong>Female Count:</strong> {femaleCount}
-      </div>
+        </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div className="mb-4">
@@ -113,6 +115,16 @@ const ViewAdmissions = () => {
               </option>
             ))}
           </select>
+
+          <select
+            style={{ width: '200px', marginTop: '10px' }}
+            value={currentStatus}
+            onChange={(e) => setCurrentStatus(e.target.value)}
+            className="w-full ml-2 mt-2 p-2 border border-gray-300 rounded"
+          >
+            <option value="1">Active Students</option>
+            <option value="0">Inactive Students</option>
+          </select>
         </div>
 
         <button
@@ -123,7 +135,7 @@ const ViewAdmissions = () => {
           Back
         </button>
       </div>
-      <div style={{ width: '97%', height: '70vh', borderRadius: '6px' }} className="overflow-y-scroll scroll-hidden downscroll mt-4">
+      <div style={{ width: '97%', height: '65vh', borderRadius: '6px' }} className="overflow-y-scroll scroll-hidden downscroll mt-4">
 
         {loading ? (
           <div className="flex justify-center items-center h-full">
@@ -131,45 +143,52 @@ const ViewAdmissions = () => {
           </div>
         ) : (
           <>
-          <div style={{width : '100%', height : '1px', background : "#1A2438"}} className='sticky top-0 p-0 m-0'></div>
-          <table style={{ width: '100%'}} className="bg-white mt-0">
-            <thead className='sticky top-0' style={{ background: '#1A2438', color: 'white'}}>
-              <tr className="text-left border-b">
-                <th className="py-3 px-4">Application Number</th>
-                <th className="py-3 px-4">Registration ID</th>
-                <th className="py-3 px-4">Name</th>
-                <th className="py-3 px-4">Image</th>
-                <th className="py-3 px-4">View</th>
-                <th className="py-3 px-4">Edit</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student, index) => (
-                <tr key={student.jntuno} className="border-b">
-                  <td className="py-3 px-4">{student.applicationnumber}</td>
-                  <td style={{ textTransform: 'uppercase' }} className="py-3 px-4">{student.registrationid}</td>
-                  <td style={{ textTransform: 'capitalize' }} className="py-3 px-4">{student.nameasperssc}</td>
-                  <td className="py-3 px-4">
-                    <img src={student.imgurl} alt="Profile" className="w-10 h-10 rounded-full" />
-                  </td>
-                  <td className="py-3 px-6">
-                    <button className="text-gray-500 hover:text-gray-700" onClick={() => handleDetails(index)}>
-                      <IoEye />
-                    </button>
-                  </td>
-                  <td className="py-3 px-4">
-                    <button className="text-black-500 hover:text-blue-700" onClick={() => handleUpdate(index)}>
-                      <FaUserEdit />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            {students.length === 0 ? (
+              <div style={{ textAlign: 'center' }} className="mt-4 text-lg">No students found for this selection.</div>
+            ) : (
+              <table style={{width : '100vw', overflowX : 'scroll'}} className="bg-white border border-gray-300">
+                <thead className='sticky top-0 bg-black text-white'>
+                  <tr>
+                    <th className="py-3 px-2 border-b text-left">Image</th>
+                    <th className="py-3 px-2 border-b text-left">Reg ID</th>
+                    <th className=" py-3 px-2 border-b text-left">Application No.</th>
+                    <th className="py-3 px-2 border-b text-left">Name</th>
+                    <th className=" py-3 px-2 border-b text-left">Gender</th>
+                    <th className=" py-3 px-2 border-b text-left">Status</th>
+                    <th className=" py-3 px-2 border-b text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((student, index) => (
+                    <tr key={student.registrationid}>
+                      <td className="py-3 px-2 border-b">student.imageurl</td>
+                      <td className="py-3 px-2 border-b">{student.registrationid}</td>
+                      <td className="py-3 px-2 border-b">{student.applicationnumber}</td>
+                      <td className="py-3 px-2 border-b">{student.nameasperssc}</td>
+                      <td className="py-3 px-2 border-b">{student.gender}</td>
+                      <td className="py-3 px-2 border-b">{student.studentstatus === 1 ? 'Active' : 'Inactive'}</td>
+                      <td className="py-3 px-2 border-b text-center">
+                        <button
+                          onClick={() => handleDetails(index)}
+                          className="text-blue-600 hover:text-blue-800 mr-2"
+                        >
+                          <IoEye size={20} />
+                        </button>
+                        <button
+                          onClick={() => handleUpdate(index)}
+                          className="text-green-600 hover:text-green-800 mr-2"
+                        >
+                          <FaUserEdit size={20} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </>
         )}
       </div>
-
     </div>
   );
 };

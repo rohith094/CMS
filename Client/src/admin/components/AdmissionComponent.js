@@ -11,6 +11,7 @@ import AdmitStudentForm from "../pages/AdmitStudentForm";
 import AdmissionSidebar from "./AdmissionSidebar";
 import ViewAdmissions from "./ViewAdmissions";
 import BulkUpdateComponent from "../pages/BulkUpdateComponent";
+import DownloadFilteredData from "../pages/DownloadFilteredData";
 function AdmissionComponent() {
   
 
@@ -28,6 +29,7 @@ function AdmissionComponent() {
           <Route path="viewstudent/:registrationid" element={<Singlestudent />} />  
           <Route path="updatestudent/:registrationid" element={<UpdateStudent />} />
           <Route path="bulkupdate" element={<BulkUpdateComponent />} />
+          <Route path="downloadstudents" element={<DownloadFilteredData />} />
         </Routes>
         
         <Outlet />
