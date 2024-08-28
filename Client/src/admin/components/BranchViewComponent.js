@@ -1,23 +1,3 @@
-// import React from 'react'
-// import { Link, Routes, Route, Outlet } from 'react-router-dom';
-// import AddCourse from './courses/AddCourse';
-
-// const BranchViewComponent = () => {
-//   return (
-//     <div>
-//       <Link to="addcourse">Add Course</Link>
-
-//       <Routes>
-//           <Route path="addcourse" element={<AddCourse />} />
-//       </Routes>
-
-//         <Outlet />
-//     </div>
-//   )
-// }
-
-// export default BranchViewComponent;
-
 
 import React from "react";
 import '../admindashstyle.css';
@@ -32,6 +12,9 @@ import DownloadFilteredData from "../pages/DownloadFilteredData";
 import BranchSideBar from "./BranchSideBar";
 import AddCourse from "./courses/AddCourse";
 import CoursesList from "./courses/CoursesList";
+import CourseUpload from "./courses/CoursesUpload";
+import DownloadCourses from "./courses/DownloadCourses";
+import EditCourse from "./courses/EditCourse";
 function BranchViewComponent() {
 
 
@@ -46,6 +29,9 @@ function BranchViewComponent() {
           <Route path="" element={<Welcomepage />} />
           <Route index path='addcourse' element={<AddCourse />} />
           <Route index path='viewcourses' element={<CoursesList />} />
+          <Route path="editcourse/:coursecode" element={<EditCourse />} />
+          <Route path="bulkuploadcourses" element={<CourseUpload />} />
+          <Route path="downloadcourses" element={<DownloadCourses />} />
         </Routes>
 
         <Outlet />

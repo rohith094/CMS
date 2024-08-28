@@ -1,195 +1,175 @@
 import React, { useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
 
 const EditCourse = () => {
-  const [formData, setFormData] = useState({
-    coursecode: '',
-    coursename: '',
-    coursecredits: '',
-    semesternumber: '',
-    branchcode: '',
-    coursetype: ''
-  });
-  const [semesters, setSemesters] = useState([]);
-  const [branches, setBranches] = useState([]);
   const { coursecode } = useParams();
   const navigate = useNavigate();
+  const [course, setCourse] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [courseData, setCourseData] = useState({
+    coursename: '',
+    alternativename: '',
+    coursedescription: '',
+    coursetype: 'lecture', // Default value
+    coursecredits: '',
+    learninghours: '',
+    coursecredits2: '',
+    learninghours2: ''
+  });
+
+  const token = Cookies.get('admintoken');
+  const {branchcode } =  useParams();
 
   useEffect(() => {
-    // Fetch semesters and branches for dropdowns
-    const fetchSemesters = async () => {
-      try {
-        const token = Cookies.get('admintoken');
-        const response = await axios.get('http://localhost:3001/admin/allsemesters', {
-          headers: {
-            Authorization: `${token}`,
-          },
-        });
-        setSemesters(response.data);
-      } catch (error) {
-        console.error('Error fetching semesters:', error);
-      }
-    };
-
-    const fetchBranches = async () => {
-      try {
-        const token = Cookies.get('admintoken');
-        const response = await axios.get('http://localhost:3001/admin/branches', {
-          headers: {
-            Authorization: `${token}`,
-          },
-        });
-        setBranches(response.data);
-      } catch (error) {
-        console.error('Error fetching branches:', error);
-      }
-    };
-
     const fetchCourse = async () => {
       try {
-        const token = Cookies.get('admintoken');
         const response = await axios.get(`http://localhost:3001/admin/course/${coursecode}`, {
           headers: {
             Authorization: `${token}`,
           },
         });
-        setFormData(response.data);
+        setCourse(response.data);
+        setCourseData({
+          coursename: response.data.coursename,
+          alternativename: response.data.alternativename,
+          coursedescription: response.data.coursedescription,
+          coursetype: response.data.coursetype,
+          coursecredits: response.data.coursecredits,
+          learninghours: response.data.learninghours,
+          coursecredits2: response.data.coursecredits2 || '',
+          learninghours2: response.data.learninghours2 || ''
+        });
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching course:', error);
+        setLoading(false);
       }
     };
 
-    fetchSemesters();
-    fetchBranches();
     fetchCourse();
   }, [coursecode]);
 
-  const goback = () => {
-    navigate('/admin/courses');
+  const handleChange = (e) => {
+    setCourseData({ ...courseData, [e.target.name]: e.target.value });
   };
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleEditCourse = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = Cookies.get('admintoken');
-      await axios.put(
-        `http://localhost:3001/admin/course/${coursecode}`,
-        formData,
-        {
-          headers: {
-            Authorization: `${token}`,
-          },
-        }
-      );
-      navigate('/admin/courses');
+      await axios.put('http://localhost:3001/admin/updatecourse', { coursecode, ...courseData }, {
+        headers: {
+          Authorization: `${token}`,
+        },
+      });
+      toast.success('course updated succesfull');
+      navigate(`/admin/branch/${branchcode}/viewcourses`); // Navigate to the course list or course detail page after update
     } catch (error) {
-      console.error('Error editing course:', error);
+      toast.error('error updating course');
+      console.error('Error updating course:', error);
     }
   };
 
+  if (loading) return <div>Loading...</div>;
+
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <form onSubmit={handleEditCourse} className="bg-white p-8 rounded-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Edit Course</h2>
-        <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-2">Course Code:</label>
-          <input
-            type="text"
-            name="coursecode"
-            value={formData.coursecode}
-            onChange={handleInputChange}
-            disabled
-            className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-200"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-2">Course Name:</label>
+    <div style={{height : '100vh', overflowY : 'scroll', margin : '0px 10px '}} className=" downscroll container py-4">
+      <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Edit Course</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-gray-700 font-semibold mb-2">Course Name</label>
           <input
             type="text"
             name="coursename"
-            value={formData.coursename}
-            onChange={handleInputChange}
-            required
+            value={courseData.coursename}
+            onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-2">Course Credits:</label>
+        <div>
+          <label className="block text-gray-700 font-semibold mb-2">Alternative Name</label>
+          <input
+            type="text"
+            name="alternativename"
+            value={courseData.alternativename}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-semibold mb-2">Course Description</label>
+          <textarea
+            name="coursedescription"
+            value={courseData.coursedescription}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-semibold mb-2">Course Type</label>
+          <select
+            name="coursetype"
+            value={courseData.coursetype}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          >
+            <option value="lecture">Lecture</option>
+            <option value="practical">Practical</option>
+            <option value="integrated">Integrated</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-gray-700 font-semibold mb-2">Course Credits</label>
           <input
             type="number"
             name="coursecredits"
-            value={formData.coursecredits}
-            onChange={handleInputChange}
-            required
+            value={courseData.coursecredits}
+            onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-2">Semester Number:</label>
-          <select
-            name="semesternumber"
-            value={formData.semesternumber}
-            onChange={handleInputChange}
-            required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-          >
-            <option value="">Select Semester</option>
-            {semesters.map((semester) => (
-              <option key={semester.semesternumber} value={semester.semesternumber}>
-                {semester.semesternumber} - {semester.semestername}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-2">Branch Code:</label>
-          <select
-            name="branchcode"
-            value={formData.branchcode}
-            onChange={handleInputChange}
-            required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-          >
-            <option value="">Select Branch</option>
-            {branches.map((branch) => (
-              <option key={branch.branchcode} value={branch.branchcode}>
-                {branch.branchcode} - {branch.branchname}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-2">Course Type:</label>
+        <div>
+          <label className="block text-gray-700 font-semibold mb-2">Learning Hours</label>
           <input
-            type="text"
-            name="coursetype"
-            value={formData.coursetype}
-            onChange={handleInputChange}
+            type="number"
+            name="learninghours"
+            value={courseData.learninghours}
+            onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
           />
         </div>
+        {courseData.coursetype === 'integrated' && (
+          <>
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">Additional Course Credits</label>
+              <input
+                type="number"
+                name="coursecredits2"
+                value={courseData.coursecredits2}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">Additional Learning Hours</label>
+              <input
+                type="number"
+                name="learninghours2"
+                value={courseData.learninghours2}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </>
+        )}
         <button
+        style={{background : '#1A2438'}}
           type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300"
+          className="w-full text-white px-4 py-2 rounded-md"
         >
-          Save Changes
-        </button>
-
-        <button 
-          type="button"
-          className="mt-2 w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition duration-300"
-          onClick={goback}
-        >
-          Back
+          Update Course
         </button>
       </form>
     </div>

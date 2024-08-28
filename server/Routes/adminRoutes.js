@@ -819,31 +819,6 @@ Router.get('/student-analytics',adminAuth, async (req, res) => {
 
 //Courses
 
-// Router.post('/addcourse', adminAuth, async (req, res) => {
-//   const { coursecode, coursename,alternativename,coursedescription, coursecredits, learninghours,totalcoursecredits, branchcode, coursetype } = req.body;
-//   const query = `INSERT INTO courses (coursecode, coursename,alternativename,coursedescription, coursecredits,learninghours,totalcoursecredits,  branchcode, coursetype)
-//                  VALUES (?, ?, ?, ?, ?, ?, ?,?,?)`;
-
-//   try {
-//     const [result] = await connection.execute(query, [coursecode, coursename,alternativename,coursedescription, coursecredits, learninghours,totalcoursecredits, branchcode, coursetype,]);
-//     res.status(201).json({
-//       courseid: result.insertId,
-//       coursecode,
-//       coursename,
-//       alternativename,
-//       coursedescription,
-//       coursecredits,
-//       learninghours,
-//       totalcoursecredits,
-//       branchcode,
-//       coursetype
-//     });
-//   } catch (error) {
-//     console.error('An error occurred while adding the course:', error);
-//     res.status(500).send(error.sqlMessage);
-//   }
-// });
-
 Router.post('/addcourse',adminAuth, async (req, res) => {
   const {
     coursecode,
@@ -859,7 +834,7 @@ Router.post('/addcourse',adminAuth, async (req, res) => {
   } = req.body;
 
   try {
-    if (coursetype === 'lecture' || coursetype === 'practical') {
+    if (coursetype !== 'integrated') {
       const totalcoursecredits = coursecredits; // For lecture and practical, total course credits is the same as course credits
 
       const insertCourseQuery = `
@@ -880,7 +855,7 @@ Router.post('/addcourse',adminAuth, async (req, res) => {
         branchcode,
       ]);
 
-    } else if (coursetype === 'integrated') {
+    } else if( coursetype === 'integrated') {
       const ctype1 = 'lecture';
       const ctype2 = 'practical';
 
@@ -932,8 +907,7 @@ Router.post('/addcourse',adminAuth, async (req, res) => {
   }
 });
 
-
-Router.post('/addcourses', adminAuth, upload.single('file'), async (req, res) => {
+Router.post('/addcourses/:branchcode', adminAuth, upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
@@ -941,56 +915,129 @@ Router.post('/addcourses', adminAuth, upload.single('file'), async (req, res) =>
   const filePath = req.file.path;
 
   try {
-    // Read the file from the disk
+    // Read the Excel file from the disk
     const workbook = xlsx.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(sheet);
 
-    for (const row of data) {
-      // Check for missing fields
-      // if (!row.coursecode || !row.coursename || !row.coursecredits || !row.semesternumber || !row.branchcode || !row.coursetype) {
-      //   continue; // Skip rows with missing required fields
-      // }
+    // Iterate through the data array and insert each course into the database
+    const branchcode = req.params.branchcode;
+    for (const course of data) {
+      const {
+        coursecode,
+        coursename,
+        alternativename,
+        coursedescription,
+        coursetype,
+        coursecredits,
+        learninghours,
+        coursecredits2,
+        learninghours2
+      } = course;
 
-      // Insert course data into the database
-      const [existingCourse] = await connection.query(
-        'SELECT coursecode FROM courses WHERE coursecode = ?',
-        [row.coursecode]
-      );
+      if (coursetype !=="integrated") {
+        const totalcoursecredits = coursecredits;
 
-      if (existingCourse.length > 0) {
-        console.log(`Course with code ${row.coursecode} already exists. Skipping.`);
-        continue; // Skip inserting this row if coursecode already exists
+        const insertCourseQuery = `
+          INSERT INTO courses 
+          (coursecode, coursename, alternativename, coursedescription, coursetype, coursecredits, learninghours, totalcoursecredits, branchcode)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        await connection.query(insertCourseQuery, [
+          coursecode,
+          coursename,
+          alternativename,
+          coursedescription,
+          coursetype,
+          coursecredits,
+          learninghours,
+          totalcoursecredits,
+          branchcode,
+        ]);
+
+      } else if (coursetype === 'integrated') {
+        const ctype1 = 'lecture';
+        const ctype2 = 'practical';
+
+        const totalcoursecredits = parseFloat(coursecredits) + parseFloat(coursecredits2);
+
+        const insertCourseQuery1 = `
+          INSERT INTO courses 
+          (coursecode, coursename, alternativename, coursedescription, coursetype, coursecredits, learninghours, totalcoursecredits, branchcode)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const insertCourseQuery2 = `
+          INSERT INTO courses 
+          (coursecode, coursename, alternativename, coursedescription, coursetype, coursecredits, learninghours, totalcoursecredits, branchcode)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        // Insert the first part of the integrated course
+        await connection.query(insertCourseQuery1, [
+          coursecode,
+          coursename,
+          alternativename,
+          coursedescription,
+          ctype1,
+          coursecredits,
+          learninghours,
+          totalcoursecredits,
+          branchcode,
+        ]);
+
+        // Insert the second part of the integrated course
+        await connection.query(insertCourseQuery2, [
+          coursecode,
+          coursename,
+          alternativename,
+          coursedescription,
+          ctype2,
+          coursecredits2,
+          learninghours2,
+          totalcoursecredits,
+          branchcode,
+        ]);
       }
-
-      
-      const query = `
-        INSERT INTO courses (
-          coursecode, coursename,alternativename,coursedescription, coursecredits,learninghours,totalcoursecredits, branchcode, coursetype
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-      const values = [
-        row.coursecode, row.coursename, row.alternativename, row.coursedescription, row.coursecredits, row.learninghours, row.totalcoursecredits, row.branchcode, row.coursetype
-      ];
-
-      await connection.query(query, values);
     }
 
     res.status(200).json({ message: 'Courses added successfully' });
-  } catch (err) {
-    console.error('Error processing file:', err);
-    res.status(500).json({ error: 'Failed to add courses', details: err.message });
-  } finally {
-    fs.unlinkSync(filePath); // Clean up the uploaded file
+  } catch (error) {
+    console.error('Error adding courses:', error);
+    res.status(500).json({ error: 'Error adding courses' });
   }
 });
 
 // Get all courses
 Router.get('/courses/:branchcode', adminAuth, async (req, res) => {
-  const {branchcode } = req.params;
-  const query = 'SELECT * FROM courses where branchcode = ?';
+  const { branchcode } = req.params;
+  const { coursecode } = req.query; // Get the coursecode query parameter
 
+  let query = 'SELECT * FROM courses WHERE branchcode = ?';
+  let queryParams = [branchcode];
+
+  if (coursecode) {
+    query += ' AND coursecode LIKE ?';
+    queryParams.push(`%${coursecode}%`);
+  }
+
+  try {
+    const [results] = await connection.execute(query, queryParams);
+    res.json(results);
+  } catch (error) {
+    console.error('An error occurred while fetching courses:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+//downloadcourses
+Router.get('/downloadcourses/:branchcode', adminAuth, async (req, res) => {
+  const { branchcode } = req.params;
+
+  const query = 'SELECT * FROM courses WHERE branchcode = ?';
+  
   try {
     const [results] = await connection.execute(query, [branchcode]);
     res.json(results);
@@ -1000,46 +1047,210 @@ Router.get('/courses/:branchcode', adminAuth, async (req, res) => {
   }
 });
 
+
 // Get a specific course by coursecode
 Router.get('/course/:coursecode', adminAuth, async (req, res) => {
   const query = 'SELECT * FROM courses WHERE coursecode = ?';
 
   try {
     const [results] = await connection.execute(query, [req.params.coursecode]);
+
     if (results.length === 0) {
       return res.status(404).send('Course not found');
     }
-    res.json(results[0]);
+
+    if (results.length === 1) {
+      // Non-integrated course, return all columns
+      res.json(results[0]);
+    } else if (results.length === 2) {
+      // Integrated course, modify coursetype and return the modified response
+      const response = {
+        ...results[0],
+        coursetype: 'integrated', // Modify coursetype to integrated
+        coursecredits2: results[1].coursecredits,
+        learninghours2: results[1].learninghours,
+      };
+      res.json(response);
+    } else {
+      // Handle unexpected cases where the course code has more than 2 entries
+      res.status(400).send('Unexpected data structure for the course');
+    }
   } catch (error) {
     console.error('An error occurred while fetching the course:', error);
     res.status(500).send('An error occurred');
   }
 });
 
+
 // Update a course by coursecode
-Router.put('/course/:coursecode', adminAuth, async (req, res) => {
-  const { coursename, coursecredits, semesternumber, branchcode, coursetype } = req.body;
-  const query = `UPDATE courses SET coursename = ?, coursecredits = ?, semesternumber = ?, branchcode = ?, coursetype = ? 
-                 WHERE coursecode = ?`;
+Router.put('/updatecourse', adminAuth, async (req, res) => {
+  const {
+    coursecode,
+    coursename,
+    alternativename,
+    coursedescription,
+    coursetype,
+    coursecredits,
+    learninghours,
+    coursecredits2,
+    learninghours2,
+  } = req.body;
 
   try {
-    const [result] = await connection.execute(query, [coursename, coursecredits, semesternumber, branchcode, coursetype, req.params.coursecode]);
-    if (result.affectedRows === 0) {
+    // Fetch the existing course details, including branchcode
+    const fetchQuery = 'SELECT * FROM courses WHERE coursecode = ?';
+    const [fetchResults] = await connection.execute(fetchQuery, [coursecode]);
+
+    if (fetchResults.length === 0) {
       return res.status(404).send('Course not found');
     }
-    res.json({
-      coursecode: req.params.coursecode,
-      coursename,
-      coursecredits,
-      semesternumber,
-      branchcode,
-      coursetype
-    });
+
+    const currentCourse = fetchResults[0];
+    let currentCoursetype;
+
+    if(fetchResults.length === 1){
+      currentCoursetype = currentCourse.coursetype;
+    }
+
+    if(fetchResults.length === 2){
+      currentCoursetype = 'integrated';
+    }
+
+    
+    
+    const branchcode = currentCourse.branchcode;
+
+    // Check if the coursetype has changed
+    if (coursetype === currentCoursetype) {
+      // No change in coursetype
+      if (coursetype === 'integrated') {
+        // Update integrated course (two rows)
+        await connection.query('DELETE FROM courses WHERE coursecode = ?', [coursecode]);
+
+        const totalcoursecredits = parseFloat(coursecredits) + parseFloat(coursecredits2); // Sum of both course credits
+
+        const insertCourseQuery1 = `
+          INSERT INTO courses 
+          (coursecode, branchcode, coursename, alternativename, coursedescription, coursetype, coursecredits, learninghours, totalcoursecredits)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const insertCourseQuery2 = `
+          INSERT INTO courses 
+          (coursecode, branchcode, coursename, alternativename, coursedescription, coursetype, coursecredits, learninghours, totalcoursecredits)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        // Insert updated integrated course parts
+        await connection.query(insertCourseQuery1, [
+          coursecode,
+          branchcode,
+          coursename,
+          alternativename,
+          coursedescription,
+          'lecture',
+          coursecredits,
+          learninghours,
+          totalcoursecredits,
+        ]);
+        await connection.query(insertCourseQuery2, [
+          coursecode,
+          branchcode,
+          coursename,
+          alternativename,
+          coursedescription,
+          'practical',
+          coursecredits2,
+          learninghours2,
+          totalcoursecredits,
+        ]);
+      } else {
+        // Update non-integrated course (single row)
+        const updateCourseQuery = `
+          UPDATE courses
+          SET coursename = ?, alternativename = ?, coursedescription = ?, coursecredits = ?, learninghours = ?
+          WHERE coursecode = ? AND coursetype = ?
+        `;
+        await connection.query(updateCourseQuery, [
+          coursename,
+          alternativename,
+          coursedescription,
+          coursecredits,
+          learninghours,
+          coursecode,
+          coursetype,
+        ]);
+      }
+    } else {
+      // Coursetype has changed
+      await connection.query('DELETE FROM courses WHERE coursecode = ?', [coursecode]);
+
+      if (coursetype === 'integrated') {
+        // Add two rows for integrated course
+        const totalcoursecredits = parseFloat(coursecredits) + parseFloat(coursecredits2);
+
+        const insertCourseQuery1 = `
+          INSERT INTO courses 
+          (coursecode, branchcode, coursename, alternativename, coursedescription, coursetype, coursecredits, learninghours, totalcoursecredits)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const insertCourseQuery2 = `
+          INSERT INTO courses 
+          (coursecode, branchcode, coursename, alternativename, coursedescription, coursetype, coursecredits, learninghours, totalcoursecredits)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        await connection.query(insertCourseQuery1, [
+          coursecode,
+          branchcode,
+          coursename,
+          alternativename,
+          coursedescription,
+          'lecture',
+          coursecredits,
+          learninghours,
+          totalcoursecredits,
+        ]);
+        await connection.query(insertCourseQuery2, [
+          coursecode,
+          branchcode,
+          coursename,
+          alternativename,
+          coursedescription,
+          'practical',
+          coursecredits2,
+          learninghours2,
+          totalcoursecredits,
+        ]);
+      } else {
+        // Add a single row for non-integrated course
+        const insertCourseQuery = `
+          INSERT INTO courses 
+          (coursecode, branchcode, coursename, alternativename, coursedescription, coursetype, coursecredits, learninghours, totalcoursecredits)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        await connection.query(insertCourseQuery, [
+          coursecode,
+          branchcode,
+          coursename,
+          alternativename,
+          coursedescription,
+          coursetype,
+          coursecredits,
+          learninghours,
+          coursecredits,
+        ]);
+      }
+    }
+
+    res.status(200).json({ message: 'Course updated successfully' });
   } catch (error) {
-    console.error('An error occurred while updating the course:', error);
-    res.status(500).send('An error occurred');
+    console.error('Error updating course:', error);
+    res.status(500).json({ error: 'Error updating course' });
   }
 });
+
+
+
 
 // Delete a course by coursecode
 Router.delete('/course/:coursecode', adminAuth, async (req, res) => {
