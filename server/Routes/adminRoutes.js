@@ -252,6 +252,22 @@ Router.get('/branch/:id', adminAuth, async (req, res) => {
   }
 });
 
+Router.get('/branchname/:branchcode', adminAuth, async (req, res) => {
+  const query = 'SELECT * FROM branches WHERE branchcode = ?';
+
+  try {
+    const [results] = await connection.execute(query, [req.params.branchcode]);
+    if (results.length === 0) {
+      return res.status(404).send('Branch not found');
+    }
+    res.json(results[0]);
+  } catch (error) {
+    console.error('An error occurred while fetching the branch:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+
 Router.put('/branch/:id', adminAuth, async (req, res) => {
   const { branchname, hodname, blocknumber, branchshortcut } = req.body;
   const query = `UPDATE branches SET branchname = ?, hodname = ?, blocknumber = ?, branchshortcut = ? 
@@ -1032,6 +1048,7 @@ Router.get('/courses/:branchcode', adminAuth, async (req, res) => {
   }
 });
 
+
 //downloadcourses
 Router.get('/downloadcourses/:branchcode', adminAuth, async (req, res) => {
   const { branchcode } = req.params;
@@ -1249,6 +1266,43 @@ Router.put('/updatecourse', adminAuth, async (req, res) => {
   }
 });
 
+//coursetype count for bar graph 
+Router.get('/course-count/:branchcode', adminAuth, async (req, res) => {
+  const { branchcode } = req.params;
+
+  const query = `
+    SELECT coursecode, COUNT(*) AS count, 
+           MAX(coursetype = 'lecture') AS hasLecture, 
+           MAX(coursetype = 'practical') AS hasPractical
+    FROM courses 
+    WHERE branchcode = ? 
+    GROUP BY coursecode
+  `;
+
+  try {
+    const [results] = await connection.execute(query, [branchcode]);
+    // console.log(results);
+
+    let lectureCount = 0;
+    let practicalCount = 0;
+    let integratedCount = 0;
+
+    results.forEach(course => {
+      if (course.count === 2) {
+        integratedCount++;
+      } else if (course.hasLecture) {
+        lectureCount++;
+      } else if (course.hasPractical) {
+        practicalCount++;
+      }
+    });
+
+    res.json({ lectureCount, practicalCount, integratedCount });
+  } catch (error) {
+    console.error('An error occurred while counting courses:', error);
+    res.status(500).send('An error occurred');
+  }
+});
 
 
 
