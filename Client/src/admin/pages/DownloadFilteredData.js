@@ -85,6 +85,8 @@ const DownloadFilteredData = () => {
           <option value={new Date().getFullYear()}>{new Date().getFullYear()}</option>
           <option value={new Date().getFullYear() - 1}>{new Date().getFullYear() - 1}</option>
           <option value={new Date().getFullYear() - 2}>{new Date().getFullYear() - 2}</option>
+          <option value={new Date().getFullYear() - 3}>{new Date().getFullYear() - 3}</option>
+          <option value={new Date().getFullYear() - 4}>{new Date().getFullYear() - 4}</option>
         </select>
       </div>
       <div className="mb-4">

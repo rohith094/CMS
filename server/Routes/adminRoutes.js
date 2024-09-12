@@ -46,7 +46,6 @@ Router.post("/login", async (req, res) => {
   }
 });
 
-
 // Admin route to update the seen flag
 Router.get('/feedbacks', adminAuth, async (req, res) => {
   const query = 'select * from feedbacks';
@@ -85,8 +84,7 @@ Router.post('/feedback/mark-seen', adminAuth, async (req, res) => {
   }
 });
 
-// Semester routes 
-
+// Semester routes
 // Add a new semester
 Router.post('/addsemester', adminAuth, async (req, res) => {
   const { semesternumber, semestername, startdate, enddate, batchyear, semesteractive } = req.body;
@@ -207,7 +205,6 @@ Router.put('/managesemester/:semesterid', adminAuth, async (req, res) => {
   }
 });
 
-
 // Branch routes 
 
 Router.post('/addbranch', adminAuth, async (req, res) => {
@@ -235,7 +232,6 @@ Router.get('/branches', adminAuth, async (req, res) => {
     res.status(500).send('An error occurred');
   }
 });
-
 
 Router.get('/branch/:id', adminAuth, async (req, res) => {
   const query = 'SELECT * FROM branches WHERE branchid = ?';
@@ -431,8 +427,6 @@ Router.post('/admitstudent', adminAuth, async (req, res) => {
     res.status(500).json({ error: 'Failed to add student', details: err.message });
   }
 });
-
-
 
 Router.get('/student/:registrationid', adminAuth, async (req, res) => {
   const { registrationid } = req.params;
@@ -654,7 +648,6 @@ Router.post('/admitstudents', adminAuth, upload.single('file'), async (req, res)
     const data = xlsx.utils.sheet_to_json(sheet);
 
     for (const row of data) {
-      const applicationNumber = await generateApplicationNumber();
 
       const query = `
         INSERT INTO studentinfo (
@@ -666,7 +659,7 @@ Router.post('/admitstudents', adminAuth, upload.single('file'), async (req, res)
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`;
 
       const values = [
-        applicationNumber, row.admissionnumber, row.registrationid, row.joiningdate, row.firstname, row.middlename, row.lastname,
+        row.applicationnumber, row.admissionnumber, row.registrationid, row.joiningdate, row.firstname, row.middlename, row.lastname,
         row.studentaadhar, row.mobile, row.alternatemobile, row.personalemail, row.gender, row.dob, row.branch, row.joiningyear, row.quota,
         row.admissiontype, row.fathername, row.mothername, row.fatheraadhar, row.motheraadhar, row.scholarshipholder, row.presentaddress,
         row.presentpincode, row.currentaddress, row.currentpincode, row.moa, row.remarks, row.entrancetype, row.entrancehallticket, row.rank,
@@ -682,7 +675,6 @@ Router.post('/admitstudents', adminAuth, upload.single('file'), async (req, res)
     res.status(500).json({ error: 'Failed to add students', details: err.message });
   }
 });
-
 
 Router.get('/admissionstudents/:joiningyear/:branchcode?', adminAuth, async (req, res) => {
   const { joiningyear, branchcode } = req.params;
@@ -832,6 +824,154 @@ Router.get('/student-analytics',adminAuth, async (req, res) => {
 });
 
 
+//student routes
+
+Router.post('/addstudent', adminAuth, async (req, res) => {
+  try {
+    const password = "gmritcms2024";
+    const {
+      applicationnumber,
+      admissionnumber,
+      registrationid,
+      semesternumber,
+      joiningdate,
+      nameasperssc,
+      studentaadhar,
+      mobile,
+      alternatemobile,
+      personalemail,
+      gender,
+      dob,
+      branch,
+      joiningyear,
+      quota,
+      admissiontype,
+      fathername,
+      mothername,
+      fatheraadhar,
+      motheraadhar,
+      scholarshipholder,
+      permanentaddress,
+      permanentpincode,
+      currentaddress,
+      currentpincode,
+      moa,
+      remarks,
+      entrancetype,
+      entrancehallticket,
+      rank,
+      city,
+      state,
+      nationality,
+      religion,
+      caste,
+      castecategory
+    } = req.body;
+
+    const hashedpassword = await bcrypt.hash(password, 10);
+    console.log("hashedpassword", hashedpassword);
+
+    const query = `
+      INSERT INTO studentinfo (
+        applicationnumber, admissionnumber, registrationid, joiningdate, nameasperssc,
+        studentaadhar, mobile, alternatemobile, personalemail, gender, dob, branch, joiningyear, quota,
+        admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, permanentaddress,
+        permanentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,
+        city, state, nationality, religion, caste, castecategory, studentstatus, studentpassword, semesternumber
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const status = 0;
+    const values = [
+      applicationnumber, admissionnumber, registrationid, joiningdate, nameasperssc,
+      studentaadhar, mobile, alternatemobile, personalemail, gender, dob, branch, joiningyear, quota,
+      admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, permanentaddress,
+      permanentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,
+      city, state, nationality, religion, caste, castecategory, status, hashedpassword, semesternumber
+    ];
+
+    await connection.query(query, values);
+    res.status(200).json({ message: 'Student added successfully', applicationnumber: applicationnumber });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add student', details: err.message });
+  }
+});
+
+Router.post('/addstudents', adminAuth, upload.single('file'), async (req, res) => {
+  try {
+    const filePath = req.file.path;
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet);
+
+    const password = 'gmritcms2024';
+    
+    for (const student of data) {
+      const {
+        applicationnumber,
+        admissionnumber,
+        registrationid,
+        semesternumber,
+        joiningdate,
+        nameasperssc,
+        studentaadhar,
+        mobile,
+        alternatemobile,
+        personalemail,
+        gender,
+        dob,
+        branch,
+        joiningyear,
+        quota,
+        admissiontype,
+        fathername,
+        mothername,
+        fatheraadhar,
+        motheraadhar,
+        scholarshipholder,
+        permanentaddress,
+        permanentpincode,
+        currentaddress,
+        currentpincode,
+        moa,
+        remarks,
+        entrancetype,
+        entrancehallticket,
+        rank,
+        city,
+        state,
+        nationality,
+        religion,
+        caste,
+        castecategory
+      } = student;
+
+      const hashedpassword = await bcrypt.hash(password, 10);
+      const query = `
+        INSERT INTO studentinfo (
+          applicationnumber, admissionnumber, registrationid, joiningdate, nameasperssc,
+          studentaadhar, mobile, alternatemobile, personalemail, gender, dob, branch, joiningyear, quota,
+          admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, permanentaddress,
+          permanentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,
+          city, state, nationality, religion, caste, castecategory, studentstatus, studentpassword, semesternumber
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      
+      const values = [
+        applicationnumber, admissionnumber, registrationid, joiningdate, nameasperssc,
+        studentaadhar, mobile, alternatemobile, personalemail, gender, dob, branch, joiningyear, quota,
+        admissiontype, fathername, mothername, fatheraadhar, motheraadhar, scholarshipholder, permanentaddress,
+        permanentpincode, currentaddress, currentpincode, moa, remarks, entrancetype, entrancehallticket, rank,
+        city, state, nationality, religion, caste, castecategory, 1, hashedpassword, semesternumber
+      ];
+
+      await connection.query(query, values);
+    }
+
+    res.status(200).json({ message: 'Students added successfully via bulk upload' });
+  } catch (err) {
+    console.error('Error during bulk upload:', err);
+    res.status(500).json({ error: 'Failed to upload students', details: err.message });
+  }
+});
 
 //Courses
 
@@ -1048,7 +1188,6 @@ Router.get('/courses/:branchcode', adminAuth, async (req, res) => {
   }
 });
 
-
 //downloadcourses
 Router.get('/downloadcourses/:branchcode', adminAuth, async (req, res) => {
   const { branchcode } = req.params;
@@ -1063,7 +1202,6 @@ Router.get('/downloadcourses/:branchcode', adminAuth, async (req, res) => {
     res.status(500).send('An error occurred');
   }
 });
-
 
 // Get a specific course by coursecode
 Router.get('/course/:coursecode', adminAuth, async (req, res) => {
@@ -1097,7 +1235,6 @@ Router.get('/course/:coursecode', adminAuth, async (req, res) => {
     res.status(500).send('An error occurred');
   }
 });
-
 
 // Update a course by coursecode
 Router.put('/updatecourse', adminAuth, async (req, res) => {
@@ -1281,7 +1418,6 @@ Router.get('/course-count/:branchcode', adminAuth, async (req, res) => {
 
   try {
     const [results] = await connection.execute(query, [branchcode]);
-    // console.log(results);
 
     let lectureCount = 0;
     let practicalCount = 0;
@@ -1303,8 +1439,6 @@ Router.get('/course-count/:branchcode', adminAuth, async (req, res) => {
     res.status(500).send('An error occurred');
   }
 });
-
-
 
 // Delete a course by coursecode
 Router.delete('/course/:coursecode', adminAuth, async (req, res) => {

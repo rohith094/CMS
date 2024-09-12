@@ -37,13 +37,13 @@ const Addstudents = () => {
     formData.append('file', file);
     const admintoken = Cookies.get('admintoken');
     try {
-      const response = await axios.post('http://localhost:3001/admin/admitstudents', formData, {
+      const response = await axios.post('http://localhost:3001/admin/addstudents', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `${admintoken}`
         },
       });
-      toast.success(response.data);
+      toast.success("students added successfully");
       navigate('/admin/studentsdata');
     } catch (error) {
       const errormessage = error.response.data.details;
