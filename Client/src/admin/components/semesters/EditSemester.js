@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 
 const EditSemester = () => {
-  const { semesterID } = useParams();
+  const { semesternumber} = useParams();
   const [semesterNumber, setSemesterNumber] = useState('');
   const [semesterName, setSemesterName] = useState(''); // Added field for semester name
   const [startDate, setStartDate] = useState('');
@@ -26,7 +26,7 @@ const EditSemester = () => {
     setLoading(true);
     try {
       const token = Cookies.get('admintoken');
-      const response = await axios.get(`http://localhost:3001/admin/semester/${semesterID}`, {
+      const response = await axios.get(`http://localhost:3001/admin/semester/${semesternumber}`, {
         headers: {
           Authorization: `${token}`,
         },
@@ -60,7 +60,7 @@ const EditSemester = () => {
     try {
       const token = Cookies.get('admintoken');
       await axios.put(
-        `http://localhost:3001/admin/editsemester/${semesterID}`,
+        `http://localhost:3001/admin/editsemester/${semesternumber}`,
         {
           semesternumber: semesterNumber,
           semestername: semesterName,
@@ -97,10 +97,10 @@ const EditSemester = () => {
               <label className="block mb-2">Semester Number:</label>
               <input
                 type="number"
-                value={semesterNumber}
+                value={semesternumber}
                 onChange={(e) => setSemesterNumber(e.target.value)}
                 className="border rounded p-2 w-full"
-                required
+                disabled
               />
             </div>
             <div>

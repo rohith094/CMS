@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from 'axios';
-import { FaRegEdit } from 'react-icons/fa';
-import { MdOutlineDeleteOutline } from "react-icons/md";
+import { Link } from 'react-router-dom';
 
 const Semesters = () => {
   const [semesters, setSemesters] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [loadingSemester, setLoadingSemester] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,44 +29,6 @@ const Semesters = () => {
       console.error('Error fetching semesters:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleEdit = (semesterid) => {
-    navigate(`editsemester/${semesterid}`);
-  };
-
-  const handleDelete = async (semesterid) => {
-    try {
-      const token = Cookies.get('admintoken');
-      await axios.delete(`http://localhost:3001/admin/deletesemester/${semesterid}`, {
-        headers: {
-          Authorization: `${token}`,
-        },
-      });
-      fetchSemesters();
-    } catch (error) {
-      console.error('Error deleting semester:', error);
-    }
-  };
-
-  const toggleActive = async (semesterid, currentStatus) => {
-    setLoadingSemester(semesterid);
-    try {
-      const token = Cookies.get('admintoken');
-      await axios.put(`http://localhost:3001/admin/managesemester/${semesterid}`, 
-        { semesteractive: !currentStatus },
-        {
-          headers: {
-            Authorization: `${token}`,
-          },
-        }
-      );
-      fetchSemesters();
-    } catch (error) {
-      console.error('Error toggling semester status:', error);
-    } finally {
-      setLoadingSemester(null);
     }
   };
 
@@ -103,31 +63,20 @@ const Semesters = () => {
           <div className="text-center">Loading semesters...</div>
         ) : (
           semesters.map((semester) => (
-            <div
-              key={semester.semesterid}
-              className={`p-2 mb-2 rounded ${semester.semesteractive ? 'bg-green-300' : 'bg-red-300'}`}
-            >
-              <div className="flex justify-between items-center p-2">
-                <p className='text-xl mr-4'>{semester.semestername} :   {semester.batchyear} - {semester.batchyear + 4}</p>
-                <div className='flex items-center justify-center'>
-                  <p style={{ fontSize: "15px" }}>{formatDate(semester.startdate)}</p>
-                  <p style={{ fontSize: "15px" }}>-{formatDate(semester.enddate)}</p>
-                </div>
-                <div className='flex justify-center gap-x-4 items-center'>
-                  <FaRegEdit className='cursor-pointer text-cyan-900 text-xl mr-2' onClick={() => handleEdit(semester.semesterid)} />
-                  <MdOutlineDeleteOutline className='cursor-pointer text-cyan-900 text-xl mr-2' onClick={() => handleDelete(semester.semesterid)} />
-                  <button
-                    className={`bg-${semester.semesteractive ? 'blue' : 'blue'}-500 hover:bg-${
-                      semester.semesteractive ? 'blue' : 'blue'
-                    }-700 text-white w-28 py-2 px-4 rounded`}
-                    onClick={() => toggleActive(semester.semesterid, semester.semesteractive)}
-                    disabled={loadingSemester === semester.semesterid}
-                  >
-                    {loadingSemester === semester.semesterid ? 'Loading...' : semester.semesteractive ? 'Deactivate' : 'Activate'}
-                  </button>
+            <Link to={`/admin/semesters/${semester.semesternumber}`}>
+              <div
+                key={semester.semesterid}
+                className={`p-2 mb-2 rounded ${semester.semesteractive ? 'bg-green-300' : 'bg-red-300'}`}
+              >
+                <div className="flex justify-between items-center p-2">
+                  <p className='text-xl mr-4'>{semester.semestername} :   {semester.batchyear} - {semester.batchyear + 4}</p>
+                  <div className='flex items-center justify-center'>
+                    <p style={{ fontSize: "15px" }}>{formatDate(semester.startdate)}</p>
+                    <p style={{ fontSize: "15px" }}>-{formatDate(semester.enddate)}</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))
         )}
       </div>

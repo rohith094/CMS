@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { FaRegEdit } from 'react-icons/fa';
+import { MdOutlineDeleteOutline } from "react-icons/md";
 import { Link } from 'react-router-dom';
 
-const Branches = () => {
+const Curriculumns = () => {
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -52,12 +54,12 @@ const Branches = () => {
     <div className='p-2'>
       <header className="flex justify-between items-center p-4">
         <h3 className='text-center text-4xl mb-4 ml-2'>Branches</h3>
-        <button
+        {/* <button
           className="bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           onClick={() => navigate('addbranch')}
         >
           Add Branch
-        </button>
+        </button> */}
       </header>
       <div style={{ width: "97%" }} className="p-4">
         {loading ? (
@@ -65,7 +67,7 @@ const Branches = () => {
         ) : (
           branches.map((branch) => (
             <>
-            <Link to={`/admin/branch/${branch.branchcode}`}>
+            <Link to={`/admin/curriculum/${branch.branchcode}`}>
             <div
               key={branch.BranchID}
               className="p-2 mb-2 rounded bg-gray-200"
@@ -88,4 +90,4 @@ const Branches = () => {
   );
 };
 
-export default Branches;
+export default Curriculumns;

@@ -9,10 +9,9 @@ const SemesterComponent = () => {
         
         
         <Routes>
-          <Route path="" element={<Semesters />} />
-          
+          <Route path="" element={<Semesters />} />  
           <Route path="addsemester" element={<AddSemester />} />
-          <Route path="editsemester/:semesterID" element={<EditSemester />} />
+          <Route path="editsemester" element={<EditSemester />} />
         </Routes>
         
         <Outlet />

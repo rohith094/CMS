@@ -151,24 +151,37 @@ Router.get('/allsemesters', adminAuth, async (req, res) => {
   }
 });
 
-// View a specific semester by ID
-Router.get('/semester/:semesterid', adminAuth, async (req, res) => {
-  const { semesterid } = req.params;
-  const query = 'SELECT * FROM semesters WHERE semesterid = ?';
+Router.get('/activesemesters', adminAuth, async (req, res) => {
+  const query = 'SELECT * FROM semesters  where semesteractive=1 ORDER BY semesternumber';
 
   try {
-    const [result] = await connection.execute(query, [semesterid]);
-
-    if (result.length === 0) {
-      return res.status(404).json({ message: 'Semester not found' });
-    }
-
-    res.json(result[0]); // Send the first result, which should be the single semester
+    const [results] = await connection.execute(query);
+    res.json(results);
   } catch (error) {
-    console.error('An error occurred while retrieving the semester:', error);
+    console.error('An error occurred while fetching semesters:', error);
     res.status(500).send('An error occurred');
   }
 });
+
+// View a specific semester by ID
+
+// Router.get('/semester/:semesterid', adminAuth, async (req, res) => {
+//   const { semesterid } = req.params;
+//   const query = 'SELECT * FROM semesters WHERE semesterid = ?';
+
+//   try {
+//     const [result] = await connection.execute(query, [semesterid]);
+
+//     if (result.length === 0) {
+//       return res.status(404).json({ message: 'Semester not found' });
+//     }
+
+//     res.json(result[0]); // Send the first result, which should be the single semester
+//   } catch (error) {
+//     console.error('An error occurred while retrieving the semester:', error);
+//     res.status(500).send('An error occurred');
+//   }
+// });
 
 // Delete a semester by ID
 Router.delete('/deletesemester/:semesterid', adminAuth, async (req, res) => {
@@ -191,19 +204,20 @@ Router.delete('/deletesemester/:semesterid', adminAuth, async (req, res) => {
 });
 
 // Manage semester status (activate/deactivate) by ID
-Router.put('/managesemester/:semesterid', adminAuth, async (req, res) => {
-  const { semesterid } = req.params;
-  const { semesteractive } = req.body;
-  const query = 'UPDATE semesters SET semesteractive = ? WHERE semesterid = ?';
 
-  try {
-    await connection.execute(query, [semesteractive, semesterid]);
-    res.json({ message: 'Semester status updated successfully' });
-  } catch (error) {
-    console.error('An error occurred while updating semester status:', error);
-    res.status(500).send('An error occurred');
-  }
-});
+// Router.put('/managesemester/:semesterid', adminAuth, async (req, res) => {
+//   const { semesterid } = req.params;
+//   const { semesteractive } = req.body;
+//   const query = 'UPDATE semesters SET semesteractive = ? WHERE semesterid = ?';
+
+//   try {
+//     await connection.execute(query, [semesteractive, semesterid]);
+//     res.json({ message: 'Semester status updated successfully' });
+//   } catch (error) {
+//     console.error('An error occurred while updating semester status:', error);
+//     res.status(500).send('An error occurred');
+//   }
+// });
 
 // Branch routes 
 
@@ -1188,6 +1202,21 @@ Router.get('/courses/:branchcode', adminAuth, async (req, res) => {
   }
 });
 
+// Backend route to get courses by branchcode
+Router.get('/courses/:branchcode', adminAuth, async (req, res) => {
+  const { branchcode } = req.params;
+  const query = 'SELECT DISTINCT coursecode FROM courses WHERE branchcode = ?';
+
+  try {
+    const [results] = await connection.execute(query, [branchcode]);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching courses:', error);
+    res.status(500).send('Error fetching courses');
+  }
+});
+
+
 //downloadcourses
 Router.get('/downloadcourses/:branchcode', adminAuth, async (req, res) => {
   const { branchcode } = req.params;
@@ -1455,6 +1484,389 @@ Router.delete('/course/:coursecode', adminAuth, async (req, res) => {
     res.status(500).send('An error occurred');
   }
 });
+
+
+//curriculum routes 
+
+Router.post('/addcurriculum', adminAuth, async (req, res) => {
+  const { coursecode, branchcode, semesternumber, coursetype } = req.body;
+
+  try {
+    const insertCurriculumQuery = `
+      INSERT INTO curriculum (coursecode, branchcode, semesternumber, coursetype)
+      VALUES (?, ?, ?, ?)
+    `;
+
+    await connection.query(insertCurriculumQuery, [coursecode, branchcode, semesternumber, coursetype]);
+
+    res.status(200).json({ message: 'Curriculum added successfully' });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'Curriculum with the same coursecode, branchcode, and semesternumber already exists' });
+    }
+    console.error('Error adding curriculum:', error);
+    res.status(500).json({ error: 'Error adding curriculum' });
+  }
+});
+
+Router.get('/viewcurriculum/:branchcode/:semesternumber', adminAuth, async (req, res) => {
+  const { branchcode, semesternumber } = req.params;
+
+  try {
+    const getCurriculumQuery = `SELECT * FROM curriculum WHERE branchcode = ? AND semesternumber = ?`;
+
+    const [results] = await connection.query(getCurriculumQuery, [branchcode, semesternumber]);
+
+    if (results.length === 0) {
+      // console.log("no curriculum found");
+      return res.status(404).json({ error: 'No curriculum found for the specified branch and semester' });
+    } 
+
+    res.status(200).json(results); // Return all curriculum entries matching branchcode and semesternumber
+  } catch (error) {
+    console.error('Error fetching curriculum:', error);
+    res.status(500).json({ error: 'Error fetching curriculum' });
+  }
+});
+
+Router.get('/curriculum/:curriculumid', adminAuth, async (req, res) => {
+  const { curriculumid } = req.params;
+
+  try {
+    const selectCurriculumQuery = `
+      SELECT * FROM curriculum WHERE curriculumid = ?
+    `;
+
+    const [result] = await connection.query(selectCurriculumQuery, [curriculumid]);
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: 'Curriculum not found' });
+    }
+
+    res.status(200).json(result[0]); // Send the curriculum data
+  } catch (error) {
+    console.error('Error fetching curriculum data:', error);
+    res.status(500).json({ error: 'Error fetching curriculum data' });
+  }
+});
+
+
+Router.put('/updatecurriculum/:curriculumid', adminAuth, async (req, res) => {
+  const { curriculumid } = req.params;
+  const { coursecode, branchcode, semesternumber, coursetype } = req.body;
+
+  try {
+    const updateCurriculumQuery = `
+      UPDATE curriculum 
+      SET coursecode = ?, branchcode = ?, semesternumber = ?, coursetype = ?
+      WHERE curriculumid = ?
+    `;
+
+    const [result] = await connection.query(updateCurriculumQuery, [coursecode, branchcode, semesternumber, coursetype, curriculumid]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Curriculum not found' });
+    }
+
+    res.status(200).json({ message: 'Curriculum updated successfully' });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      // Send the error message for duplicate entries
+      return res.status(400).json({
+        error: `Duplicate entry '${coursecode}-${branchcode}-${semesternumber}' for key 'PRIMARY'`,
+      });
+    }
+    console.error('Error updating curriculum:', error);
+    res.status(500).json({ error: 'Error updating curriculum' });
+  }
+});
+
+Router.delete('/deletecurriculum/:curriculumid', adminAuth, async (req, res) => {
+  const { curriculumid } = req.params;
+
+  try {
+    const deleteCurriculumQuery = `DELETE FROM curriculum WHERE curriculumid = ?`;
+
+    const [result] = await connection.query(deleteCurriculumQuery, [curriculumid]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Curriculum not found' });
+    }
+
+    res.status(200).json({ message: 'Curriculum deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting curriculum:', error);
+    res.status(500).json({ error: 'Error deleting curriculum' });
+  }
+});
+
+
+
+// shadow routes ;
+
+// section routes 
+//Section Routes
+//Add Section
+Router.post('/addsection', adminAuth, async (req, res) => {
+  const { sectionname, sectionstrength, branchcode, semesternumber } = req.body;
+
+  // Validate that no field is undefined
+  if (!sectionname || !sectionstrength || !branchcode || !semesternumber) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  try {
+    // Fetch the branch shortcut using branchcode
+    const branchQuery = 'SELECT branchshortcut FROM branches WHERE branchcode = ?';
+    const [branch] = await connection.execute(branchQuery, [branchcode]);
+
+    if (branch.length === 0) {
+      return res.status(404).json({ message: 'Branch not found' });
+    }
+
+    const branchshortcut = branch[0].branchshortcut;
+
+    // Generate sectioncode in the format "semesternumber-branchshortcut-sectionname"
+    const sectioncode = `${semesternumber}-${branchshortcut}-${sectionname}`;
+
+    // Insert the new section into the database
+    const insertQuery = `
+      INSERT INTO sections (sectioncode, sectionname, sectionstrength, branchcode, semesternumber)
+      VALUES (?, ?, ?, ?, ?)`;
+    
+    await connection.execute(insertQuery, [sectioncode, sectionname, sectionstrength, branchcode, semesternumber]);
+
+    res.status(201).json({ message: 'Section added successfully', sectioncode });
+  } catch (error) {
+    console.error('Error while adding the section:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+//Update Section
+Router.put('/updatesection/:sectioncode', adminAuth, async (req, res) => {
+  const { sectioncode } = req.params;
+  const { sectionname, sectionstrength} = req.body;
+
+  try {
+    const query = `
+      UPDATE sections 
+      SET sectionname = ?, sectionstrength = ?
+      WHERE sectioncode = ?`;
+
+    const [result] = await connection.execute(query, [sectionname, sectionstrength,  sectioncode]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Section not found' });
+    }
+
+    res.status(200).json({ message: 'Section updated successfully' });
+  } catch (error) {
+    console.error('Error while updating the section:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+//View Section
+Router.get('/section/:sectioncode', adminAuth, async (req, res) => {
+  const { sectioncode } = req.params;
+
+  try {
+    const query = 'SELECT * FROM sections WHERE sectioncode = ?';
+    const [section] = await connection.execute(query, [sectioncode]);
+
+    if (section.length === 0) {
+      return res.status(404).json({ message: 'Section not found' });
+    }
+
+    res.status(200).json(section[0]);
+  } catch (error) {
+    console.error('Error while fetching the section:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+//Delete Section
+Router.delete('/deletesection/:sectioncode', adminAuth, async (req, res) => {
+  const { sectioncode } = req.params;
+
+  try {
+    const query = 'DELETE FROM sections WHERE sectioncode = ?';
+    const [result] = await connection.execute(query, [sectioncode]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Section not found' });
+    }
+
+    res.status(200).json({ message: 'Section deleted successfully' });
+  } catch (error) {
+    console.error('Error while deleting the section:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+// Fetch Sections by Branch Code and Semester Number
+Router.get('/section/:branchcode/:semesternumber', adminAuth, async (req, res) => {
+  const { branchcode, semesternumber } = req.params;
+
+  try {
+    const query = `
+      SELECT * FROM sections 
+      WHERE branchcode = ? AND semesternumber = ?`;
+    const [sections] = await connection.execute(query, [branchcode, semesternumber]);
+
+    if (sections.length === 0) {
+      return res.status(404).json({ message: 'No sections found for this branch and semester' });
+    }
+
+    res.status(200).json(sections);
+  } catch (error) {
+    console.error('Error fetching sections:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.get('/semester/:semesternumber', adminAuth, async (req, res) => {
+  const { semesternumber } = req.params;
+
+  let query = 'SELECT * FROM semesters WHERE semesternumber = ?';
+  let queryParams = [semesternumber];
+
+  try {
+    const [results] = await connection.execute(query, queryParams);
+    if (results.length === 0) {
+      return res.status(404).send('Semester not found');
+    }
+    res.json(results[0]);
+  } catch (error) {
+    console.error('An error occurred while fetching semester details:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.get('/studentcount/:semesternumber', adminAuth, async (req, res) => {
+  const { semesternumber } = req.params;
+
+  // Query to fetch students grouped by branch shortcut for the given semesternumber
+  const query = `
+    SELECT b.branchshortcut, COUNT(si.stdid) AS studentCount 
+    FROM studentinfo si
+    JOIN branches b ON si.branch = b.branchcode 
+    WHERE si.semesternumber = ? 
+    GROUP BY b.branchshortcut
+  `;
+
+  try {
+    const [results] = await connection.execute(query, [semesternumber]);
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No students found for this semester' });
+    }
+
+    res.json(results); // Send grouped student count by branch shortcut
+  } catch (error) {
+    console.error('An error occurred while fetching students:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.put('/managesemester/:semesternumber', adminAuth, async (req, res) => {
+  const { semesternumber } = req.params;
+  const { semesteractive } = req.body;
+
+  let query = 'UPDATE semester SET semesteractive = ? WHERE semesternumber = ?';
+  let queryParams = [semesteractive, semesternumber];
+
+  try {
+    const [result] = await connection.execute(query, queryParams);
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Semester not found');
+    }
+    res.send('Semester status updated successfully');
+  } catch (error) {
+    console.error('An error occurred while updating semester status:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.post('/promotestudents/:semesternumber', adminAuth, async (req, res) => {
+  const { semesternumber } = req.params;
+
+  // console.log()
+
+  if (!semesternumber) {
+    return res.status(400).json({ message: 'Semester number is required' });
+  }
+
+  try {
+    // Fetch the semester details
+    const semesterQuery = 'SELECT enddate FROM semesters WHERE semesternumber = ? AND semesteractive = 1';
+    const [semester] = await connection.execute(semesterQuery, [semesternumber]);
+
+    if (semester.length === 0) {
+      return res.status(404).json({ message: 'Semester not found or inactive' });
+    }
+
+    const endDate = semester[0].enddate;
+    const currentDate = new Date();
+
+    // Check if current date is greater than the semester's end date
+    if (currentDate <= new Date(endDate)) {
+      return res.status(400).json({ message: 'Cannot promote students before semester end date' });
+    }
+
+    // Promote only active students (studentstatus = 1) for the given semester
+    const promoteQuery = `
+      UPDATE studentinfo
+      SET semesternumber = semesternumber + 1
+      WHERE semesternumber = ? AND studentstatus = 1
+    `;
+
+    const [result] = await connection.execute(promoteQuery, [semesternumber]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'No active students found to promote' });
+    }
+
+    res.status(200).json({ message: 'Students promoted successfully' });
+  } catch (error) {
+    console.error('Error promoting students:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+Router.get('/studentbysemester/:semesternumber', adminAuth, async (req, res) => {
+  const { semesternumber } = req.params;
+
+  if (!semesternumber) {
+    return res.status(400).json({ message: 'Semester number is required' });
+  }
+
+  try {
+    // Fetch active students and their branch shortcut for the given semester
+    const query = `
+      SELECT s.registrationid, 
+             s.nameasperssc, 
+             b.branchshortcut
+      FROM studentinfo s
+      JOIN branches b ON s.branch = b.branchcode
+      WHERE s.semesternumber = ? AND s.studentstatus = 1
+      ORDER BY b.branchshortcut
+    `;
+
+    const [students] = await connection.execute(query, [semesternumber]);
+
+    if (students.length === 0) {
+      return res.status(404).json({ message: 'No active students found for this semester' });
+    }
+
+    res.status(200).json({ students });
+  } catch (error) {
+    console.error('Error fetching students:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
 
 export default Router;
 

@@ -24,11 +24,58 @@ const Addstudents = () => {
       const workbook = XLSX.read(binaryStr, { type: 'binary' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-      setData(jsonData);
+      const data = XLSX.utils.sheet_to_json(worksheet, {
+        defval: '', // Include empty cells
+        raw: false, // Let the library handle dates automatically
+        dateNF: 'yyyy-mm-dd' // Specify the desired date format
+      });
+
+      const formattedData = data.map(row => {
+        if (row.joiningdate) {
+          row.joiningdate = parseAndFormatDate(row.joiningdate);
+        }
+        if (row.dob) {
+          row.dob = parseAndFormatDate(row.dob);
+        }
+        // Add similar checks for any other date fields
+        return row;
+      });
+
+      setData(formattedData);
       setPreview(true);
     };
     reader.readAsBinaryString(selectedFile);
+  };
+
+
+  const parseAndFormatDate = (dateString) => {
+    // Check if the value is already a valid date
+    const parsedDate = new Date(dateString);
+    if (!isNaN(parsedDate)) {
+      const day = String(parsedDate.getDate()).padStart(2, '0');
+      const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+      const year = parsedDate.getFullYear();
+      return `${year}-${month}-${day}`;
+    }
+
+    // If not, try to parse assuming the input is in 'dd-mm-yyyy' format
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1; // Month is zero-indexed in JS
+      const year = parseInt(parts[2], 10);
+      const newDate = new Date(year, month, day);
+      if (!isNaN(newDate)) {
+        const formattedDay = String(newDate.getDate()).padStart(2, '0');
+        const formattedMonth = String(newDate.getMonth() + 1).padStart(2, '0');
+        const formattedYear = newDate.getFullYear();
+        return `${formattedYear}-${formattedMonth}-${formattedDay}`;
+      }
+    }
+
+    // If the date is still invalid, return the original string or a fallback
+    console.warn('Invalid date value:', dateString);
+    return dateString; // or return '' to skip invalid dates
   };
 
   const handleSubmit = async () => {
@@ -54,7 +101,7 @@ const Addstudents = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
+    <div className='downscroll' style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', height : '100vh', overflowY : 'scroll', padding : '10px' }}>
       <div className=" bg-white rounded-lg text-center">
         <h2 className="mt-10 text-2xl font-bold">Upload Your File</h2>
         <div className="flex flex-col items-start">
@@ -75,12 +122,12 @@ const Addstudents = () => {
         </div>
       </div>
 
-      <div className="mt-3 mb-4 mx-auto bg-white rounded-lg">
+      <div className="mt-3  mb-4 mx-auto bg-white rounded-lg" >
         {preview && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Preview</h2>
+          <div style={{margin : '20px', height : '80vh', overflowY : 'scroll'}}>
+            <h2 className="text-xl font-semibold mb-4 ">Preview</h2>
             <div style={{width:"70vw"}} className="overflow-x-auto downscroll">
-              <table  className=" bg-white border border-gray-200">
+              <table style={{height : ''}} className=" bg-white border border-gray-200">
                 <thead>
                   <tr>
                     {Object.keys(data[0]).map((key) => (
@@ -145,7 +192,7 @@ const Addstudents = () => {
             </button>
           </div>
         )}
-      </div>
+    </div>
     </div>
   );
 };

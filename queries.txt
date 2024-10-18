@@ -100,6 +100,76 @@ CREATE TABLE courses (
 );
 
 
+CREATE TABLE sections (
+    sectionid INT AUTO_INCREMENT UNIQUE,
+    sectioncode VARCHAR(20) PRIMARY KEY,
+    sectionname VARCHAR(100) NOT NULL,
+    sectionstrength INT,
+    studentstrength INT,
+    branchcode VARCHAR(20),
+    semesternumber INT,
+    FOREIGN KEY (branchcode) REFERENCES branches(branchcode),
+    FOREIGN KEY (semesternumber) REFERENCES semesters(semesternumber)
+);
+
+
+CREATE TABLE curriculum (
+    curriculumid INT UNIQUE AUTO_INCREMENT,
+    coursecode VARCHAR(20),
+    branchcode VARCHAR(20),
+    semesternumber INT,
+    coursetype VARCHAR(50) NOT NULL,
+    PRIMARY KEY (coursecode, branchcode, semesternumber),  -- Composite primary key
+    FOREIGN KEY (coursecode) REFERENCES courses(coursecode),
+    FOREIGN KEY (branchcode) REFERENCES branches(branchcode),
+    FOREIGN KEY (semesternumber) REFERENCES semesters(semesternumber)
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

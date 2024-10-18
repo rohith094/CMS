@@ -37,6 +37,68 @@ const transporter = nodemailer.createTransport({
 
 
 
+// Route to get course details for the logged-in student based on their registration ID
+Router.get('/courses', authRoute, async (req, res) => {
+  const studentEmail = req.user; // req.user contains the decoded student email from the token
+
+  try {
+    // Step 1: Get student's registrationid from studentinfo table using the email
+    const getRegistrationIdQuery = `
+      SELECT registrationid 
+      FROM studentinfo 
+      WHERE personalemail = ?
+    `;
+
+    const [registrationResult] = await connection.query(getRegistrationIdQuery, [studentEmail]);
+
+    // If no student found, return 404
+    if (registrationResult.length === 0) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    const { registrationid } = registrationResult[0];
+
+    // Step 2: Get branchcode and semesternumber using the registrationid
+    const getStudentInfoQuery = `
+      SELECT branch, semesternumber 
+      FROM studentinfo 
+      WHERE registrationid = ?
+    `;
+
+    const [studentInfoResult] = await connection.query(getStudentInfoQuery, [registrationid]);
+
+    // If no info found, return 404
+    if (studentInfoResult.length === 0) {
+      return res.status(404).json({ error: 'No information found for the student' });
+    }
+
+    const { branch, semesternumber } = studentInfoResult[0];
+
+    // Step 3: Fetch courses for the student's semester from the curriculum table
+    const getCoursesQuery = `
+      SELECT c.coursecode, c.coursetype, cu.coursename, cu.coursedescription, cu.coursecredits, cu.learninghours, cu.totalcoursecredits 
+      FROM curriculum AS c
+      JOIN courses AS cu ON c.coursecode = cu.coursecode 
+      WHERE c.semesternumber = ? AND c.branchcode = ?
+    `;
+
+    const [courses] = await connection.query(getCoursesQuery, [semesternumber, branch]);
+
+    // If no courses found, return 404
+    if (courses.length === 0) {
+      return res.status(404).json({ error: 'No courses found for the student\'s semester and branch' });
+    }
+
+    // Return the courses with details for the student's semester
+    res.status(200).json(courses);
+  } catch (error) {
+    // Log error and return 500 status
+    console.error('Error fetching courses:', error);
+    res.status(500).json({ error: 'Error fetching courses' });
+  }
+});
+
+
 
 Router.get('/singlestudent', authRoute, async (req, res) => {
   const query = 'SELECT * FROM studentinfo WHERE personalemail = ?';
@@ -115,8 +177,6 @@ Router.post('/feedback', authRoute, async (req, res) => {
   }
 });
 
-
-
 Router.get("/sendotp/:email", async (req, res) => {
   const { email } = req.params;
   console.log(email);
@@ -161,7 +221,6 @@ Router.get("/sendotp/:email", async (req, res) => {
   }
 });
 
-
 Router.post("/verifyotp", async (req, res) => {
   const { email, otp, password } = req.body;
 
@@ -193,6 +252,8 @@ Router.post("/verifyotp", async (req, res) => {
     return res.status(500).json({ message: "Failed to verify OTP and update password" });
   }
 });
+
+
 
 export default Router;
 

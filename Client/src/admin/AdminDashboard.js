@@ -18,6 +18,11 @@ import BranchComponent from "./components/BranchComponent";
 import CourseComponent from "./components/CourseComponent";
 import AdmissionComponent from "./components/AdmissionComponent";
 import BranchViewComponent from "./components/BranchViewComponent";
+import Curriculumns from "./components/Curriculumns";
+import ViewCurriculum from "./components/ViewCurriculum";
+import CurriculumComponent from "./components/CiruculumComponent";
+import Sections from "./components/Sections";
+import ViewSemesterComponent from "./components/semesters/ViewSemesterComponent";
 
 function AdminDashboard() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -187,9 +192,13 @@ function AdminDashboard() {
           <Route path='placementsdata' element={<Placementsdata />} />
           <Route path='feedbackdata' element={<Feedbacks />} />
           <Route path="semesters/*" element={<SemesterComponent />} />
+          <Route path="semesters/:semesternumber/*" element={<ViewSemesterComponent />} />
           <Route path="branches/*" element={<BranchComponent />} />
           <Route path="branch/:branchcode/*" element={<BranchViewComponent />} />
-          <Route path="sections/*" element={<SectionComponent />} />
+          <Route path="curriculum/*" element={<Curriculumns />} />
+          <Route path="curriculum/:branchcode/*" element={<CurriculumComponent />} />
+          <Route path="sections/*" element={<Sections />} />
+          <Route path="sections/:branchcode/*" element={<SectionComponent/>} />
         </Routes>
         <Outlet />
       </div>
