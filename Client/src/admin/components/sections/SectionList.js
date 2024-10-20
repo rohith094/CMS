@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
-
+import { Link } from 'react-router-dom';
 
 const SectionList = () => {
   const { branchcode } = useParams(); // Fetch branchcode from URL params
@@ -108,14 +108,17 @@ const SectionList = () => {
       {loading ? (
         <div className="text-center">Loading sections...</div>
       ) : (
+        
         <div>
           {sections.length > 0 ? (
             sections.map((section) => (
+              <Link to={`/admin/sections/${branchcode}/${section.sectioncode}`}>
               <div key={section.sectionid} className="p-2 mb-2 rounded bg-gray-200">
                 <p><strong>Section Name:</strong> {section.sectionname}</p>
                 <p><strong>Section Code:</strong> {section.sectioncode}</p>
                 <p><strong>Section Strength:</strong> {section.sectionstrength}</p>
               </div>
+              </Link>
             ))
           ) : (
             <p>No sections found for the selected semester.</p>

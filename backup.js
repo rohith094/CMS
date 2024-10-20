@@ -538,3 +538,117 @@ Router.get('/filterstudents/download', adminAuth, async (req, res) => {
     res.status(500).send('An error occurred');
   }
 });
+
+
+
+// import React, { useState, useEffect } from 'react';
+// import { useParams } from 'react-router-dom';
+// import axios from 'axios';
+// import Cookies from 'js-cookie';
+
+// const MapStudents = () => {
+//   const { sectioncode } = useParams(); // Getting the sectioncode from URL parameters
+//   const [students, setStudents] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const [buttonLoading, setButtonLoading] = useState(false);
+//   const token = Cookies.get('admintoken')
+
+//   useEffect(() => {
+//     const fetchStudents = async () => {
+//       setLoading(true);
+//       try {
+//         const response = await axios.get(`http://localhost:3001/admin/sectionstudentsbysemester/${sectioncode}`, {
+//           headers : {
+//             Authorization : `${token}`
+//           }
+//         });
+//         setStudents(response.data);
+//       } catch (error) {
+//         console.error('Error fetching students:', error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchStudents();
+//   }, [sectioncode]);
+
+//   const handleButtonClick = (registrationId) => {
+//     setButtonLoading(true);
+//     // Perform any action you want here
+//     setTimeout(() => {
+//       setButtonLoading(false); // Reset button loading state after action
+//     }, 1000);
+//   };
+
+//   return (
+//     <div className="p-6">
+//       <h1 className="text-2xl font-bold mb-4">Map Students</h1>
+//       {loading ? (
+//         <div className="flex justify-center items-center">
+//           <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32 mb-4"></div>
+//         </div>
+//       ) : (
+//         <div className="overflow-x-auto">
+//           <table className="min-w-full bg-white border border-gray-200">
+//             <thead>
+//               <tr>
+//                 <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registration ID</th>
+//                 <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+//                 <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester Number</th>
+//                 <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
+//                 <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {students.map((student) => (
+//                 <tr key={student.registrationid}>
+//                   <td className="px-6 py-4 whitespace-nowrap border-b text-sm text-gray-900">{student.registrationid}</td>
+//                   <td className="px-6 py-4 whitespace-nowrap border-b text-sm text-gray-900">{student.nameasperssc}</td>
+//                   <td className="px-6 py-4 whitespace-nowrap border-b text-sm text-gray-900">{student.semesternumber}</td>
+//                   <td className="px-6 py-4 whitespace-nowrap border-b text-sm text-gray-900">{student.branch}</td>
+//                   <td className="px-6 py-4 whitespace-nowrap border-b">
+//                     <button
+//                       onClick={() => handleButtonClick(student.registrationid)}
+//                       className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200 ${
+//                         buttonLoading ? 'opacity-50 cursor-not-allowed' : ''
+//                       }`}
+//                       disabled={buttonLoading}
+//                     >
+//                       {buttonLoading ? (
+//                         <svg
+//                           className="animate-spin h-5 w-5 text-white"
+//                           xmlns="http://www.w3.org/2000/svg"
+//                           fill="none"
+//                           viewBox="0 0 24 24"
+//                         >
+//                           <circle
+//                             className="opacity-25"
+//                             cx="12"
+//                             cy="12"
+//                             r="10"
+//                             stroke="currentColor"
+//                             strokeWidth="4"
+//                           ></circle>
+//                           <path
+//                             className="opacity-75"
+//                             fill="currentColor"
+//                             d="M4 12a8 8 0 018-8v8l3.09-3.09a6 6 0 11-6.16 0L8 12z"
+//                           ></path>
+//                         </svg>
+//                       ) : (
+//                         'Map'
+//                       )}
+//                     </button>
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default MapStudents;

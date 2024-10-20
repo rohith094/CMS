@@ -64,6 +64,7 @@ CREATE TABLE studentinfo (
     religion varchar(20),
     caste varchar(20),
     castecategory varchar(20)
+    sectioncode varchar()
 );		
 
 CREATE TABLE semesters (

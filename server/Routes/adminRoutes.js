@@ -1705,7 +1705,106 @@ Router.delete('/deletesection/:sectioncode', adminAuth, async (req, res) => {
   }
 });
 
+//getting the student details using sectioncode
+Router.get('/sectionstudents/:sectioncode', adminAuth, async (req, res) => {
+  const { sectioncode } = req.params;
+  const query = `SELECT registrationid,nameasperssc FROM studentinfo WHERE sectioncode = ?`;
+
+  try {
+    const [students] = await connection.execute(query, [sectioncode]);
+
+    if (students.length === 0) {
+      return res.status(404).json({ message: 'No students found for the provided section code.' });
+    }
+
+    res.status(200).json(students);
+  } catch (error) {
+    console.error('An error occurred while fetching student details:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+
+// Router.get('/sectionstudentsbysemester/:sectioncode', adminAuth, async (req, res) => {
+//   const { sectioncode } = req.params;
+  
+//   // Split the single parameter (e.g., '7-CSE-B') into semesternumber, branchshortcut, and sectionname
+//   const [semesternumber, branchshortcut, sectionname] = sectioncode.split('-');
+
+//   const snumber = parseInt(semesternumber, 10);
+
+//   try {
+//     // Step 1: Get the branchcode using the branchshortcut from the branches table
+//     const branchQuery = `SELECT branchcode FROM branches WHERE branchshortcut = ?`;
+//     const [branchResult] = await connection.execute(branchQuery, [branchshortcut]);
+
+//     if (branchResult.length === 0) {
+//       return res.status(404).json({ message: 'Branch not found for the provided branch shortcut.' });
+//     }
+
+//     const branchcode = branchResult[0].branchcode;
+
+//     // Step 2: Fetch students' registrationid and nameasperssc from the studentinfo table using semesternumber and branchcode
+//     const studentQuery = `
+//       SELECT registrationid, nameasperssc, semesternumber, branch 
+//       FROM studentinfo 
+//       WHERE branch = ? AND semesternumber = ?
+//     `;
+//     const [students] = await connection.execute(studentQuery, [branchcode, snumber]);
+
+//     if (students.length === 0) {
+//       return res.status(404).json({ message: 'No students found for the provided semester number, branch code, and section name.' });
+//     }
+
+//     // Return the student details
+//     res.status(200).json(students);
+//   } catch (error) {
+//     console.error('An error occurred while fetching student details:', error);
+//     res.status(500).send('An error occurred');
+//   }
+// });
+
+
+
 // Fetch Sections by Branch Code and Semester Number
+
+Router.get('/sectionstudentsbysemester/:sectioncode', adminAuth, async (req, res) => {
+  const { sectioncode } = req.params;
+
+  // Split the single parameter (e.g., '7-CSE-B') into semesternumber, branchshortcut, and sectionname
+  const [semesternumber, branchshortcut, sectionname] = sectioncode.split('-');
+
+  const snumber = parseInt(semesternumber, 10);
+
+  try {
+    // Step 1: Get the branchcode using the branchshortcut from the branches table
+    const branchQuery = `SELECT branchcode FROM branches WHERE branchshortcut = ?`;
+    const [branchResult] = await connection.execute(branchQuery, [branchshortcut]);
+
+    if (branchResult.length === 0) {
+      return res.status(404).json({ message: 'Branch not found for the provided branch shortcut.' });
+    }
+
+    const branchcode = branchResult[0].branchcode;
+
+    // Step 2: Fetch students' registrationid, nameasperssc, and sectioncode from the studentinfo table using semesternumber and branchcode
+    const studentQuery = `
+      SELECT registrationid, nameasperssc, semesternumber, branch, sectioncode
+      FROM studentinfo 
+      WHERE branch = ? AND semesternumber = ? AND (sectioncode IS NULL OR sectioncode = '')
+    `;
+    const [students] = await connection.execute(studentQuery, [branchcode, snumber]);
+
+    if (students.length === 0) {
+      return res.status(404).json({ message: 'No students found for the provided semester number, branch code, and section name.' });
+    }
+
+    // Return the student details
+    res.status(200).json(students);
+  } catch (error) {
+    console.error
+  }});
+
 Router.get('/section/:branchcode/:semesternumber', adminAuth, async (req, res) => {
   const { branchcode, semesternumber } = req.params;
 
@@ -1866,6 +1965,81 @@ Router.get('/studentbysemester/:semesternumber', adminAuth, async (req, res) => 
     res.status(500).send('An error occurred');
   }
 });
+
+//mapping the  sectioncode in students table 
+Router.post('/mapstudenttosection/:sectioncode', adminAuth, async (req, res) => {
+  const { sectioncode } = req.params;
+  const { registrationid } = req.body; // Get registrationid from the request body
+
+  // Ensure all required parameters are present
+  if (!sectioncode || !registrationid) {
+    return res.status(400).json({ message: 'Section code and registrationid are required' });
+  }
+
+  try {
+    // Directly update the sectioncode for the student with the given registrationid
+    const updateQuery = `
+      UPDATE studentinfo
+      SET sectioncode = ?
+      WHERE registrationid = ?
+    `;
+    const [result] = await connection.execute(updateQuery, [sectioncode, registrationid]);
+
+    // If no rows are updated, return an error
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'No student found to update section code' });
+    }
+
+    res.status(200).json({ message: 'Section code updated successfully for the student', updatedRows: result.affectedRows });
+  } catch (error) {
+    console.error('Error updating section code:', error);
+    res.status(500).send('An error occurred while updating section code');
+  }
+});
+
+//bulk mapping of students to section 
+Router.post('/mapstudentstosection/:sectioncode', adminAuth, async (req, res) => {
+  const { sectioncode } = req.params;
+  const { registrationids } = req.body; // Expect an array of registrationids
+
+  // Ensure all required parameters are present
+  if (!sectioncode || !registrationids || !Array.isArray(registrationids) || registrationids.length === 0) {
+    return res.status(400).json({ message: 'Section code and an array of registrationids are required' });
+  }
+
+  try {
+    // Flatten the array of registrationids into a format MySQL understands
+    const placeholders = registrationids.map(() => '?').join(',');
+    console.log(placeholders) // Creates a series of `?` placeholders
+    const values = [sectioncode, ...registrationids]; // Array of values for query
+    console.log(values);
+    // Update the sectioncode for all students with the given registrationids
+    const updateQuery = `
+      UPDATE studentinfo
+      SET sectioncode = ?
+      WHERE registrationid IN (${placeholders})
+    `;
+    
+    const [result] = await connection.execute(updateQuery, values);
+
+    // If no rows are updated, return an error
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'No students found to update section code' });
+    }
+
+    res.status(200).json({ message: 'Section code updated successfully for the students', updatedRows: result.affectedRows });
+  } catch (error) {
+    console.error('Error updating section code:', error);
+    res.status(500).send('An error occurred while updating section code');
+  }
+});
+
+
+
+
+
+
+
 
 
 export default Router;
