@@ -1550,7 +1550,6 @@ Router.get('/curriculum/:curriculumid', adminAuth, async (req, res) => {
   }
 });
 
-
 Router.put('/updatecurriculum/:curriculumid', adminAuth, async (req, res) => {
   const { curriculumid } = req.params;
   const { coursecode, branchcode, semesternumber, coursetype } = req.body;
@@ -1600,7 +1599,114 @@ Router.delete('/deletecurriculum/:curriculumid', adminAuth, async (req, res) => 
   }
 });
 
+//faculty routes 
 
+Router.post('/addfaculties', adminAuth, upload.single('file'), async (req, res) => {
+  try {
+    const filePath = req.file.path;
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet);
+
+    const defaultPassword = 'faculty2024'; // Default password for new faculty
+    const skippedFacultyCodes = []; // To keep track of duplicates
+
+    for (const faculty of data) {
+      const {
+        gender,
+        age,
+        maritalstatus,
+        religion,
+        caste,
+        facultycode,
+        facultyname,
+        facultyemail,
+        facultynumber,
+        facultydesignation,
+        facultybranch,
+        facultyqualifications,
+        facultyaddress,
+        facultyexperience,
+        facultysalary,
+        joiningyear,
+        dob,
+        facultytype
+      } = faculty;
+
+      // Check if the facultycode already exists
+      const [existingFaculty] = await connection.query(
+        'SELECT 1 FROM faculty WHERE facultycode = ?',
+        [facultycode]
+      );
+
+      if (existingFaculty.length > 0) {
+        // If facultycode exists, add it to the skipped list and continue
+        skippedFacultyCodes.push(facultycode);
+        continue;
+      }
+
+      // Hash the default password
+      const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+      // Insert new faculty record
+      const query = `
+        INSERT INTO faculty (
+          gender, age, maritalstatus, religion, caste, facultycode, facultyname,
+          facultyemail, facultynumber, facultydesignation, facultybranch, 
+          facultyqualifications, facultyaddress, facultyexperience, facultysalary, 
+          joiningyear, dob, facultytype, password
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+      const values = [
+        gender, age, maritalstatus, religion, caste, facultycode, facultyname,
+        facultyemail, facultynumber, facultydesignation, facultybranch,
+        facultyqualifications, facultyaddress, facultyexperience, facultysalary,
+        joiningyear, dob, facultytype, hashedPassword
+      ];
+
+      await connection.query(query, values);
+    }
+
+    // Construct response message
+    let message = 'Faculty members added successfully via bulk upload';
+    if (skippedFacultyCodes.length > 0) {
+      message += `. The following faculty codes were skipped because they already exist: ${skippedFacultyCodes.join(', ')}`;
+    }
+
+    res.status(200).json({ message });
+  } catch (err) {
+    console.error('Error during faculty bulk upload:', err);
+    res.status(500).json({ error: 'Failed to upload faculty members', details: err.message });
+  }
+});
+
+Router.get('/faculty/search', adminAuth, async (req, res) => {
+  const { searchBy, keyword } = req.query; // Get search type and keyword from query parameters
+
+  // Base query to fetch faculty details
+  let query = 'SELECT * FROM faculty';
+  let queryParams = [];
+
+  // Conditionally modify the query based on search type
+  if (searchBy === 'facultycode') {
+    query += ' WHERE facultycode LIKE ?';
+    queryParams.push(`%${keyword}%`);
+  } else if (searchBy === 'facultyname') {
+    query += ' WHERE facultyname LIKE ?';
+    queryParams.push(`%${keyword}%`);
+  } else {
+    return res.status(400).json({ message: 'Invalid search type. Use "facultycode" or "facultyname".' });
+  }
+
+  try {
+    const [results] = await connection.execute(query, queryParams);
+    res.json(results);
+  } catch (error) {
+    console.error('An error occurred while fetching faculty:', error);
+    res.status(500).send('An error occurred');
+  }
+});
 
 // shadow routes ;
 
@@ -1724,6 +1830,26 @@ Router.get('/sectionstudents/:sectioncode', adminAuth, async (req, res) => {
   }
 });
 
+//to fetch sections of selected semester 
+Router.get('/sections/:semesternumber/:branchcode', adminAuth, async (req, res) => {
+  const { semesternumber, branchcode } = req.params;
+
+  const query = 'SELECT sectioncode FROM sections WHERE semesternumber = ? AND branchcode = ?';
+
+  try {
+    const [results] = await connection.execute(query, [semesternumber, branchcode]);
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No sections found for the selected semester and branch.' });
+    }
+    res.json(results);
+  } catch (error) {
+    console.error('An error occurred while fetching sections for the selected semester and branch:', error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+
+
 
 // Router.get('/sectionstudentsbysemester/:sectioncode', adminAuth, async (req, res) => {
 //   const { sectioncode } = req.params;
@@ -1791,10 +1917,9 @@ Router.get('/sectionstudentsbysemester/:sectioncode', adminAuth, async (req, res
     const studentQuery = `
       SELECT registrationid, nameasperssc, semesternumber, branch, sectioncode
       FROM studentinfo 
-      WHERE branch = ? AND semesternumber = ? AND (sectioncode IS NULL OR sectioncode = '')
-    `;
+      WHERE branch = ? AND semesternumber = ?`;
     const [students] = await connection.execute(studentQuery, [branchcode, snumber]);
-
+    console.log(students);
     if (students.length === 0) {
       return res.status(404).json({ message: 'No students found for the provided semester number, branch code, and section name.' });
     }
@@ -1873,7 +1998,7 @@ Router.put('/managesemester/:semesternumber', adminAuth, async (req, res) => {
   const { semesternumber } = req.params;
   const { semesteractive } = req.body;
 
-  let query = 'UPDATE semester SET semesteractive = ? WHERE semesternumber = ?';
+  let query = 'UPDATE semesters SET semesteractive = ? WHERE semesternumber = ?';
   let queryParams = [semesteractive, semesternumber];
 
   try {
@@ -2033,6 +2158,446 @@ Router.post('/mapstudentstosection/:sectioncode', adminAuth, async (req, res) =>
     res.status(500).send('An error occurred while updating section code');
   }
 });
+
+//class schedule routes 
+
+Router.post('/classschedule', adminAuth, async (req, res) => {
+  const { facultycode, sectioncode, coursecode, day, starttime, endtime } = req.body;
+
+  try {
+    const query = `
+      INSERT INTO classschedule (facultycode, sectioncode, coursecode, day, starttime, endtime)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    await connection.execute(query, [facultycode, sectioncode, coursecode, day, starttime, endtime]);
+
+    res.status(201).json({ message: `${coursecode} Class schedule created successfully for ${sectioncode}` });
+  } catch (error) {
+    console.error('Error creating schedule:', error);
+    res.status(500).json({ message: 'Failed to create class schedule. Please try again later.' });
+  }
+});
+
+Router.put('/classschedule/:scheduleid', adminAuth, async (req, res) => {
+  const { scheduleid } = req.params;
+  const { starttime, endtime } = req.body;
+
+  try {
+    const query = `
+      UPDATE classschedule
+      SET starttime = ?, endtime = ?
+      WHERE scheduleid = ?
+    `;
+    const [result] = await connection.execute(query, [starttime, endtime, scheduleid]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Schedule not found. No update made.' });
+    }
+
+    res.status(200).json({ message: 'Class schedule updated successfully.' });
+  } catch (error) {
+    console.error('Error updating schedule:', error);
+    res.status(500).json({ message: 'Failed to update class schedule. Please try again later.' });
+  }
+});
+
+Router.get('/classschedule/:sectioncode/:day', adminAuth, async (req, res) => {
+  const { sectioncode, day } = req.params;
+
+  try {
+    const query = `SELECT * FROM classschedule WHERE sectioncode = ? AND day = ?`;
+    const [schedules] = await connection.execute(query, [sectioncode, day]);
+
+    if (schedules.length === 0) {
+      return res.status(404).json({ message: 'No schedules found for this section and day.' });
+    }
+
+    res.status(200).json({ message: 'Schedules fetched successfully.', data: schedules });
+  } catch (error) {
+    console.error('Error fetching schedules:', error);
+    res.status(500).json({ message: 'Failed to fetch schedules. Please try again later.' });
+  }
+});
+
+Router.delete('/classschedule/:scheduleid', adminAuth, async (req, res) => {
+  const { scheduleid } = req.params;
+
+  try {
+    const query = `DELETE FROM classschedule WHERE scheduleid = ?`;
+    const [result] = await connection.execute(query, [scheduleid]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Schedule not found. No deletion made.' });
+    }
+
+    res.status(200).json({ message: 'Class schedule deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting schedule:', error);
+    res.status(500).json({ message: 'Failed to delete class schedule. Please try again later.' });
+  }
+});
+
+//getting all the courses of the faculty 
+Router.get('/classes/faculty/:facultycode', adminAuth, async (req, res) => {
+  const { facultycode } = req.params;
+
+  try {
+    const query = `
+      SELECT * FROM classschedule 
+      WHERE facultycode = ?
+    `;
+    const [classes] = await connection.execute(query, [facultycode]);
+
+    if (classes.length === 0) {
+      return res.status(404).json({ message: 'No classes found for this faculty.' });
+    }
+
+    res.status(200).json({ message: 'Classes fetched successfully.', data: classes });
+  } catch (error) {
+    console.error('Error fetching classes for faculty:', error);
+    res.status(500).json({ message: 'Failed to fetch classes. Please try again later.' });
+  }
+});
+
+
+//attendance session routes 
+
+
+Router.post('/attendancesession', adminAuth, async (req, res) => {
+  const { scheduleid, date, starttime, endtime, status = 'Open' } = req.body;
+
+  try {
+    const query = `
+      INSERT INTO attendancesession (scheduleid, date, starttime, endtime, status)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+    await connection.execute(query, [scheduleid, date, starttime, endtime, status]);
+
+    res.status(201).json({ message: 'Attendance session created successfully.' });
+  } catch (error) {
+    console.error('Error creating attendance session:', error);
+    res.status(500).json({ message: 'Failed to create attendance session. Please try again later.' });
+  }
+});
+
+
+Router.get('/attendancesession/schedule/:scheduleid', adminAuth, async (req, res) => {
+  const { scheduleid } = req.params;
+
+  try {
+    const query = `SELECT * FROM attendancesession WHERE scheduleid = ?`;
+    const [sessions] = await connection.execute(query, [scheduleid]);
+
+    if (sessions.length === 0) {
+      return res.status(404).json({ message: 'No attendance sessions found for this schedule.' });
+    }
+
+    res.status(200).json({ message: 'Attendance sessions fetched successfully.', data: sessions });
+  } catch (error) {
+    console.error('Error fetching attendance sessions:', error);
+    res.status(500).json({ message: 'Failed to fetch attendance sessions. Please try again later.' });
+  }
+});
+
+
+Router.get('/attendancesession/:sessionid', adminAuth, async (req, res) => {
+  const { sessionid } = req.params;
+
+  try {
+    const query = `SELECT * FROM attendancesession WHERE sessionid = ?`;
+    const [session] = await connection.execute(query, [sessionid]);
+
+    if (session.length === 0) {
+      return res.status(404).json({ message: 'Attendance session not found.' });
+    }
+
+    res.status(200).json({ message: 'Attendance session details fetched successfully.', data: session });
+  } catch (error) {
+    console.error('Error fetching attendance session details:', error);
+    res.status(500).json({ message: 'Failed to fetch attendance session details. Please try again later.' });
+  }
+});
+
+
+Router.put('/attendancesession/:sessionid', adminAuth, async (req, res) => {
+  const { sessionid } = req.params;
+  const { date, starttime, endtime, status } = req.body;
+
+  try {
+    const query = `
+      UPDATE attendancesession 
+      SET date = ?, starttime = ?, endtime = ?, status = ? 
+      WHERE sessionid = ?
+    `;
+    const [result] = await connection.execute(query, [date, starttime, endtime, status, sessionid]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Attendance session not found.' });
+    }
+
+    res.status(200).json({ message: 'Attendance session updated successfully.' });
+  } catch (error) {
+    console.error('Error updating attendance session:', error);
+    res.status(500).json({ message: 'Failed to update attendance session. Please try again later.' });
+  }
+});
+
+
+Router.delete('/attendancesession/:sessionid', adminAuth, async (req, res) => {
+  const { sessionid } = req.params;
+
+  try {
+    const query = `DELETE FROM attendancesession WHERE sessionid = ?`;
+    const [result] = await connection.execute(query, [sessionid]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Attendance session not found.' });
+    }
+
+    res.status(200).json({ message: 'Attendance session deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting attendance session:', error);
+    res.status(500).json({ message: 'Failed to delete attendance session. Please try again later.' });
+  }
+});
+
+
+//attendence routes 
+
+//mark attendence 
+Router.post('/attendance', adminAuth, async (req, res) => {
+  const { sessionid, registrationid, status } = req.body;
+
+  try {
+    const query = `
+      INSERT INTO attendance (sessionid, registrationid, status)
+      VALUES (?, ?, ?)
+    `;
+    await connection.execute(query, [sessionid, registrationid, status]);
+
+    res.status(201).json({ message: 'Attendance marked successfully.' });
+  } catch (error) {
+    console.error('Error marking attendance:', error);
+    res.status(500).json({ message: 'Failed to mark attendance. Please try again later.' });
+  }
+});
+
+Router.get('/attendance/:sessionid', adminAuth, async (req, res) => {
+  const { sessionid } = req.params;
+
+  try {
+    const query = `SELECT * FROM attendance WHERE sessionid = ?`;
+    const [attendance] = await connection.execute(query, [sessionid]);
+
+    if (attendance.length === 0) {
+      return res.status(404).json({ message: 'No attendance records found for this session.' });
+    }
+
+    res.status(200).json({ message: 'Attendance records fetched successfully.', data: attendance });
+  } catch (error) {
+    console.error('Error fetching attendance records:', error);
+    res.status(500).json({ message: 'Failed to fetch attendance records. Please try again later.' });
+  }
+});
+
+
+Router.put('/attendance/:sessionid/:registrationid', adminAuth, async (req, res) => {
+  const { sessionid, registrationid } = req.params;
+  const { status } = req.body;
+
+  try {
+    const query = `
+      UPDATE attendance
+      SET status = ?
+      WHERE sessionid = ? AND registrationid = ?
+    `;
+    const [result] = await connection.execute(query, [status, sessionid, registrationid]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Attendance record not found. No update made.' });
+    }
+
+    res.status(200).json({ message: 'Attendance updated successfully.' });
+  } catch (error) {
+    console.error('Error updating attendance:', error);
+    res.status(500).json({ message: 'Failed to update attendance. Please try again later.' });
+  }
+});
+
+
+Router.delete('/attendance/:sessionid/:registrationid', adminAuth, async (req, res) => {
+  const { sessionid, registrationid } = req.params;
+
+  try {
+    const query = `DELETE FROM attendance WHERE sessionid = ? AND registrationid = ?`;
+    const [result] = await connection.execute(query, [sessionid, registrationid]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Attendance record not found. No deletion made.' });
+    }
+
+    res.status(200).json({ message: 'Attendance record deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting attendance record:', error);
+    res.status(500).json({ message: 'Failed to delete attendance record. Please try again later.' });
+  }
+});
+
+
+//adding schedule 
+// Route to add a schedule in the classschedule table
+Router.post('/classschedule/add', adminAuth, async (req, res) => {
+  const {
+    facultycode,
+    sectioncode,
+    day,
+    scheduledate,
+    starttime,
+    endtime,
+    coursecode,
+    repeatType, // 'none' or 'repeat'
+    endDate // if repeating, this defines the end of recurrence
+  } = req.body;
+
+  try {
+    // Function to add a single schedule entry
+    const addSchedule = async (scheduledate) => {
+      await connection.execute(
+        `INSERT INTO classschedule 
+          (facultycode, sectioncode, day, scheduledate, starttime, endtime, coursecode) 
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [facultycode, sectioncode, day, scheduledate, starttime, endtime, coursecode]
+      );
+    };
+
+    // Determine if repeat is needed
+    if (repeatType === 'none') {
+      await addSchedule(scheduledate);
+    } else {
+      let currentDate = new Date(scheduledate);
+      const endDateObject = new Date(endDate);
+
+      // Repeat weekly until the end date
+      while (currentDate <= endDateObject) {
+        await addSchedule(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 7); // Weekly increment
+      }
+    }
+
+    res.json({ message: 'Schedule added successfully' });
+  } catch (error) {
+    console.error('Error adding schedule:', error);
+    res.status(500).json({ error: 'Failed to add schedule' });
+  }
+});
+
+//getting schedule details based on facultycode and sectioncode 
+// Backend route to fetch the classes
+// Router.get('/facultyclasses', adminAuth, async (req, res) => {
+//   const { facultycode, semesternumber, branchcode } = req.query;
+
+//   try {
+//     // Fetch section codes based on the provided semester and branch
+//     const sectionQuery = `SELECT sectioncode FROM sections WHERE branchcode = ? AND semesternumber = ?`;
+//     const [sections] = await connection.execute(sectionQuery, [branchcode, semesternumber]);
+//     const sectionCodes = sections.map((section) => section.sectioncode);
+
+//     if (sectionCodes.length === 0) {
+//       return res.status(404).json({ message: 'No sections found for the provided branch and semester.' });
+//     }
+
+//     // Fetch classes from classschedule based on faculty and sections
+//     const scheduleQuery = `
+//       SELECT day, starttime, endtime, sectioncode 
+//       FROM classschedule 
+//       WHERE facultycode = ? AND sectioncode IN (?) 
+//     `;
+//     const [schedules] = await connection.execute(scheduleQuery, [facultycode, sectionCodes]);
+
+//     res.status(200).json(schedules);
+//   } catch (error) {
+//     console.error('Error fetching classes:', error);
+//     res.status(500).json({ error: 'Failed to fetch classes' });
+//   }
+// });
+
+// Router.get('/facultyclasses', adminAuth, async (req, res) => {
+//   const { facultycode, semesternumber, branchcode } = req.query;
+
+//   // Log the parameters for debugging
+//   console.log("Received parameters:", { facultycode, semesternumber, branchcode });
+
+//   // Validate that all required parameters are provided
+//   if (!facultycode || !semesternumber || !branchcode) {
+//     return res.status(400).json({ error: "Missing required parameters: facultycode, semesternumber, or branchcode" });
+//   }
+
+//   try {
+//     // Step 1: Fetch section codes based on semester and branch
+//     const sectionQuery = `SELECT sectioncode FROM sections WHERE branchcode = ? AND semesternumber = ?`;
+//     const [sections] = await connection.execute(sectionQuery, [branchcode, semesternumber]);
+//     console.log(sections);
+//     const sectionCodes = sections.map((section) => section.sectioncode);
+
+//     if (sectionCodes.length === 0) {
+//       return res.status(404).json({ message: 'No sections found for the provided branch and semester.' });
+//     }
+
+//     // Step 2: Fetch classes based on faculty and sections
+//     const scheduleQuery = `
+//       SELECT day, starttime, endtime, sectioncode 
+//       FROM classschedule 
+//       WHERE facultycode = ? AND sectioncode IN (?) 
+//     `;
+//     const [schedules] = await connection.execute(scheduleQuery, [facultycode, sectionCodes]);
+//     console.log(schedules);
+
+//     res.status(200).json(schedules);
+//   } catch (error) {
+//     console.error('Error fetching classes:', error);
+//     res.status(500).json({ error: 'Failed to fetch classes' });
+//   }
+// });
+
+Router.get('/facultyclasses', adminAuth, async (req, res) => {
+  const { facultycode, semesternumber, branchcode } = req.query;
+
+  try {
+    // Step 1: Fetch the section code using semesternumber and branchcode from the sections table
+    const sectionQuery = `SELECT sectioncode FROM sections WHERE semesternumber = ? AND branchcode = ?`;
+    const [sectionResults] = await connection.execute(sectionQuery, [semesternumber, branchcode]);
+
+    if (sectionResults.length === 0) {
+      console.log('No sections found for the provided semesternumber and branchcode');
+      return res.status(404).json({ message: 'No sections found' });
+    }
+
+    const sectioncode = sectionResults[0].sectioncode;
+    console.log(`Section Code Found: ${sectioncode}`);
+
+    // Step 2: Fetch classes from classschedule using the facultycode and sectioncode
+    const classesQuery = `
+      SELECT day, starttime, endtime, coursecode, scheduledate 
+      FROM classschedule 
+      WHERE facultycode = ? AND sectioncode = ?
+    `;
+    const [classResults] = await connection.execute(classesQuery, [facultycode, sectioncode]);
+
+    if (classResults.length === 0) {
+      console.log('No classes found for the provided facultycode and sectioncode');
+      return res.status(404).json({ message: 'No classes found' });
+    }
+
+    console.log(`Classes Found:`, classResults);
+    res.status(200).json(classResults);
+  } catch (error) {
+    console.error('Error fetching classes:', error);
+    res.status(500).send('An error occurred while fetching classes');
+  }
+});
+
+
+
 
 
 

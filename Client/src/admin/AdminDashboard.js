@@ -5,7 +5,7 @@ import './admindashstyle.css';
 import AdminSidebar from "./AdminSidebar";
 import { Routes, Route,Outlet } from 'react-router-dom';
 import Studentcomponent from "./components/Studentcomponent";
-import { Facultydata } from "./components/Facultydata";
+// import { Facultydata } from "./components/Facultydata";
 import { Subjectsdata} from "./components/Subjectsdata";
 import { Attendancedata } from "./components/Attendancedata";
 import { Examinationsdata } from "./components/Examinationsdata";
@@ -23,6 +23,7 @@ import ViewCurriculum from "./components/ViewCurriculum";
 import CurriculumComponent from "./components/CiruculumComponent";
 import Sections from "./components/Sections";
 import ViewSemesterComponent from "./components/semesters/ViewSemesterComponent";
+import FacultyComponent from "./components/FacultyComponent";
 
 function AdminDashboard() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -69,7 +70,7 @@ function AdminDashboard() {
         <Routes>
           <Route index path='studentsdata/*' element={<Studentcomponent />} /> 
           <Route  path='admissions/*' element={<AdmissionComponent />} /> 
-          <Route path='facultydata' element={<Facultydata />} />
+          <Route path='facultycomponent/*' element={<FacultyComponent />} />
           <Route path='subjectsdata' element={<Subjectsdata />} />
           <Route path='attendancedata' element={<Attendancedata />} />
           <Route path='examinationsdata' element={<Examinationsdata />} />

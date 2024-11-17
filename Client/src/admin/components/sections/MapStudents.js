@@ -22,8 +22,8 @@ const MapStudents = () => {
             Authorization: `${token}`,
           },
         });
-        const studentsWithoutSectionCode = response.data.filter(student => !student.sectioncode);
-        setStudents(studentsWithoutSectionCode);
+        // const studentsWithoutSectionCode = response.data.filter(student => !student.sectioncode);
+        setStudents(response.data);
       } catch (error) {
         console.error('Error fetching students:', error);
       } finally {
@@ -169,6 +169,7 @@ const MapStudents = () => {
                 <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester Number</th>
                 <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
+                <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section Code</th>
               </tr>
             </thead>
             <tbody>
@@ -185,6 +186,7 @@ const MapStudents = () => {
                   <td className="px-6 py-4 whitespace-nowrap border-b text-sm text-gray-900">{student.nameasperssc}</td>
                   <td className="px-6 py-4 whitespace-nowrap border-b text-sm text-gray-900">{student.semesternumber}</td>
                   <td className="px-6 py-4 whitespace-nowrap border-b text-sm text-gray-900">{student.branch}</td>
+                  <td className="px-6 py-4 whitespace-nowrap border-b text-sm text-gray-900">{student.sectioncode ?student.sectioncode : "null"}</td>
                 </tr>
               ))}
             </tbody>

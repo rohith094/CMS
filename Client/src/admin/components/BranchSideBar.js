@@ -5,7 +5,6 @@ import { FaDownload } from "react-icons/fa";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { NavLink, useParams } from 'react-router-dom';
 import { GrDocumentUpdate } from "react-icons/gr";
-import { FaEdit } from 'react-icons/fa';
 
 const IconButton = ({ icon: Icon, tooltip }) => (
   <div className="relative group">
