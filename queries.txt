@@ -160,7 +160,9 @@ CREATE TABLE classschedule (
 );
 
 
-CREATE TABLE attendancesession (
+
+
+CREATE TABLE attendancesession ( 
     sessionid INT AUTO_INCREMENT PRIMARY KEY,
     scheduleid INT NOT NULL,
     date DATE NOT NULL,
